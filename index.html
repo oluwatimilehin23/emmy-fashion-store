@@ -1,0 +1,2670 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Emmy Fashion Store: bags, shoes, clothes and accessories you can turn in 3D.">
+<meta name="theme-color" content="#FDE9EF">
+<style>html { -webkit-text-size-adjust: 100%; } body { margin: 0; } img { max-width: 100%; }</style>
+<title>Emmy Fashion Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Colour tokens are registered so the whole page can fade between colourways. */
+@property --bg1 { syntax: "<color>"; inherits: true; initial-value: #FDE9EF; }
+@property --bg2 { syntax: "<color>"; inherits: true; initial-value: #F5C3D3; }
+@property --ink { syntax: "<color>"; inherits: true; initial-value: #3B0F21; }
+@property --word { syntax: "<color>"; inherits: true; initial-value: #EEA3BA; }
+@property --accent { syntax: "<color>"; inherits: true; initial-value: #E58BA6; }
+
+/* Layout: a pinned 3D stage repaints one bag through six colours as you scroll
+   and lets you turn it 360°, then the page settles into specs, a shop grid and a wordmark footer.
+   Single look by design: every colour on the page follows the active colourway. */
+:root {
+  --bg1: #FDE9EF;
+  --bg2: #F5C3D3;
+  --ink: #3B0F21;
+  --word: #EEA3BA;
+  --accent: #E58BA6;
+  --gold: #C9A55A;
+  --dot: #FFFFFF;
+  --soft: color-mix(in srgb, var(--ink) 68%, transparent);
+  --line: color-mix(in srgb, var(--ink) 18%, transparent);
+  --glass: color-mix(in srgb, var(--bg1) 74%, transparent);
+
+  --display: "Bricolage Grotesque", "Arial Black", "Helvetica Neue", system-ui, sans-serif;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  --gl: max(clamp(16px, 4vw, 56px), env(safe-area-inset-left, 0px));
+  --gr: max(clamp(16px, 4vw, 56px), env(safe-area-inset-right, 0px));
+
+  transition: --bg1 .6s ease, --bg2 .6s ease, --ink .6s ease, --word .6s ease, --accent .6s ease;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: auto; }
+body {
+  background: var(--bg1);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.backdrop {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(130% 100% at 50% 42%, var(--bg1) 0%, var(--bg2) 100%);
+}
+main, footer { position: relative; z-index: 1; }
+
+.wrap { padding-left: var(--gl); padding-right: var(--gr); }
+.inner { max-width: 1280px; margin-inline: auto; }
+
+.eyebrow {
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--soft);
+  margin: 0;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font: 600 15px/1 var(--body);
+  padding: 15px 24px; border-radius: 999px; border: 1.5px solid var(--ink);
+  background: var(--ink); color: var(--bg1);
+  cursor: pointer; white-space: nowrap;
+  transition: transform .15s ease, background-color .2s ease, color .2s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-line { background: transparent; color: var(--ink); }
+.btn-line:hover { background: var(--ink); color: var(--bg1); }
+
+/* ---------- Header ---------- */
+.site-head {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+  padding-bottom: 14px;
+  padding-left: var(--gl); padding-right: var(--gr);
+  transition: background-color .3s ease, box-shadow .3s ease;
+}
+.site-head.solid {
+  background: color-mix(in srgb, var(--bg1) 84%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 var(--line);
+}
+.logo {
+  font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1;
+  letter-spacing: -0.05em; text-decoration: none;
+}
+.nav { display: flex; gap: 28px; }
+.nav a { text-decoration: none; font-weight: 500; font-size: 15px; }
+.nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.head-actions { display: flex; align-items: center; gap: 8px; }
+.menu-btn { display: none; }
+.mnav {
+  position: fixed; z-index: 19; left: 0; right: 0; top: 0;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 74px); padding-bottom: 20px;
+  padding-left: var(--gl); padding-right: var(--gr);
+  display: grid; background: var(--bg1); box-shadow: 0 20px 40px rgba(0,0,0,.16);
+  animation: drop .3s ease;
+}
+.mnav a {
+  display: block; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none;
+  font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: -0.02em;
+}
+.mnav a:last-child { border-bottom: 0; font-size: 18px; font-family: var(--body); font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+@keyframes drop { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+.cart-btn {
+  background: transparent; border: 1.5px solid var(--ink); border-radius: 999px;
+  padding: 9px 16px; font-weight: 600; font-size: 14px; cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.cart-btn:hover { background: var(--ink); color: var(--bg1); }
+
+/* ---------- Scroll story ---------- */
+.story { position: relative; height: 500vh; }
+.stage {
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+}
+.giant {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  display: grid; place-items: center;
+}
+.giant span {
+  display: inline-block;
+  font-family: var(--display); font-weight: 800; font-size: 200px;
+  line-height: .8; letter-spacing: -0.05em; white-space: nowrap;
+  color: var(--word);
+  transform: translateY(-4%);
+}
+#bag-canvas {
+  position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; display: block;
+  touch-action: pan-y; cursor: grab;
+}
+#bag-canvas.dragging { cursor: grabbing; }
+.fallback {
+  position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none;
+  color: var(--accent);
+}
+.fallback svg { width: min(46vw, 420px); height: auto; filter: drop-shadow(0 24px 30px rgba(0,0,0,.18)); }
+
+/* Detail points pinned to the 3D bag */
+.hotspots { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.hs {
+  position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px;
+  padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer;
+  pointer-events: auto; transition: opacity .25s ease;
+}
+.hs::before {
+  content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--dot);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.22), 0 3px 10px rgba(0,0,0,.28);
+}
+.hs::after {
+  content: ""; position: absolute; inset: 1px; border-radius: 50%; border: 1.5px solid var(--dot);
+  animation: ping 2.2s ease-out infinite;
+}
+@keyframes ping { 0% { transform: scale(.5); opacity: .9; } 80%, 100% { transform: scale(1.25); opacity: 0; } }
+.hs.off { opacity: 0; pointer-events: none; }
+.hs-card {
+  position: absolute; left: 38px; top: 50%; width: max-content; max-width: 220px;
+  display: grid; gap: 2px; padding: 10px 14px; border-radius: 14px; text-align: left;
+  background: var(--bg1); color: var(--ink); box-shadow: 0 10px 30px rgba(0,0,0,.18), 0 0 0 1px var(--line);
+  opacity: 0; transform: translateY(-50%) scale(.96); transform-origin: left center;
+  pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+}
+.hs.flip .hs-card { left: auto; right: 38px; transform-origin: right center; }
+.hs-card strong { font-size: 14px; font-weight: 600; line-height: 1.3; }
+.hs-card span { font-size: 13px; line-height: 1.4; color: var(--soft); }
+.hs:hover .hs-card, .hs.open .hs-card, .hs:focus-visible .hs-card { opacity: 1; transform: translateY(-50%) scale(1); }
+.hs:focus-visible { outline-offset: 0; border-radius: 50%; }
+
+/* 3D view controls */
+.viewer {
+  position: absolute; z-index: 4; right: var(--gr); top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.vbtn {
+  width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--line); background: var(--glass); color: var(--ink);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  font: 600 11px/1 var(--mono); letter-spacing: .02em;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+}
+.vbtn:hover { transform: scale(1.06); border-color: var(--ink); }
+.vbtn[aria-pressed="true"] { background: var(--ink); color: var(--bg1); border-color: var(--ink); }
+.vbtn svg { width: 18px; height: 18px; }
+.readout {
+  margin: 2px 0 0; white-space: nowrap; font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--soft); font-variant-numeric: tabular-nums;
+}
+
+.stage-ui {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 20px 32px; flex-wrap: wrap;
+  padding-left: var(--gl); padding-right: var(--gr);
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+.stage-ui > * { pointer-events: auto; min-width: 0; }
+.stage-left .eyebrow { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-bottom: 10px; }
+.colour-name {
+  margin: 0; font-family: var(--display); font-weight: 800;
+  font-size: clamp(44px, 7.6vw, 116px); line-height: .9; letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+.stage-right { display: flex; flex-direction: column; align-items: flex-end; gap: 18px; }
+.dots { display: flex; gap: 12px; }
+.dot {
+  position: relative; width: 26px; height: 26px; border-radius: 50%; padding: 0; cursor: pointer;
+  background: var(--c); border: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.14), inset 0 -4px 6px rgba(0,0,0,.12), inset 0 3px 5px rgba(255,255,255,.35);
+  transition: transform .2s ease;
+}
+.dot:hover { transform: scale(1.12); }
+.dot::after {
+  content: ""; position: absolute; inset: -5px; border-radius: 50%;
+  border: 1.5px solid var(--ink); opacity: 0; transform: scale(.8);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.dot[aria-pressed="true"]::after { opacity: 1; transform: scale(1); }
+.buy { display: flex; align-items: center; gap: 18px; }
+.price { font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+.hint {
+  position: absolute; z-index: 3; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 86px);
+  transform: translateX(-50%); margin: 0; white-space: nowrap; pointer-events: none;
+  display: flex; align-items: center; gap: 10px;
+  transition: opacity .3s ease;
+}
+.hint i {
+  display: block; width: 1.5px; height: 18px; background: var(--soft); border-radius: 2px;
+  animation: drip 1.6s ease-in-out infinite; transform-origin: top;
+}
+@keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+.swap { animation: swapIn .5s cubic-bezier(.2,.8,.2,1); }
+@keyframes swapIn { from { opacity: 0; transform: translateY(28%); } to { opacity: 1; transform: translateY(0); } }
+.giant span.swap { animation: giantIn .6s cubic-bezier(.2,.8,.2,1); }
+@keyframes giantIn { from { opacity: 0; transform: translateY(12%); } to { opacity: 1; transform: translateY(-4%); } }
+
+/* ---------- Details ---------- */
+.details { padding-block: clamp(80px, 11vw, 150px); }
+.details .inner { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(36px, 6vw, 96px); align-items: start; }
+h2 {
+  font-family: var(--display); font-weight: 700; font-size: clamp(36px, 4.8vw, 66px);
+  line-height: .98; letter-spacing: -0.035em; margin: 14px 0 22px; text-wrap: balance;
+}
+.lede { max-width: 58ch; font-size: 18px; line-height: 1.6; color: var(--soft); margin: 0; }
+.specs { margin: 0; }
+.specs div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 17px 0; border-top: 1px solid var(--line); }
+.specs div:last-child { border-bottom: 1px solid var(--line); }
+.specs dt { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--soft); padding-top: 3px; }
+.specs dd { margin: 0; font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* ---------- Shop ---------- */
+.shop { padding-bottom: clamp(80px, 10vw, 140px); }
+.shop-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px 40px; flex-wrap: wrap; margin-bottom: 26px; }
+.shop-head h2 { margin-bottom: 0; }
+.shop-head p { margin: 0; max-width: 40ch; color: var(--soft); }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; margin-bottom: 22px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: transparent; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+.tab span { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--soft); font-variant-numeric: tabular-nums; }
+.tab:hover { border-color: var(--ink); }
+.tab[aria-pressed="true"] { background: var(--ink); color: var(--bg1); border-color: var(--ink); }
+.tab[aria-pressed="true"] span { color: inherit; opacity: .7; }
+.grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 20px; }
+.card { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+/* Product panels read as photo backdrops, tinted by the chosen colour. */
+.panel {
+  position: relative; width: 100%; max-width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0; cursor: pointer;
+  border-radius: 20px; overflow: hidden; margin-bottom: 4px;
+  background: radial-gradient(120% 90% at 50% 38%, color-mix(in srgb, var(--c) 9%, #FFFDFA), color-mix(in srgb, var(--c) 26%, #EEE8E1));
+  display: grid; place-items: center;
+}
+.art { display: grid; place-items: center; width: 74%; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.art svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 16px 18px rgba(0,0,0,.16)); }
+.panel:hover .art { transform: translateY(-3%) scale(1.03); }
+.tag {
+  position: absolute; left: 12px; top: 12px; padding: 5px 10px; border-radius: 999px;
+  background: #FFFDFA; color: #2A1E22; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+}
+.quick {
+  position: absolute; right: 12px; bottom: 12px; padding: 7px 12px; border-radius: 999px;
+  background: rgba(255,253,250,.88); color: #2A1E22; font-size: 12px; font-weight: 600;
+  opacity: 0; transform: translateY(6px); transition: opacity .2s ease, transform .2s ease;
+}
+.panel:hover .quick, .panel:focus-visible .quick { opacity: 1; transform: none; }
+.badge3d {
+  position: absolute; right: 12px; top: 12px; padding: 5px 9px; border-radius: 999px;
+  background: #2A1E22; color: #FFFDFA; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em;
+}
+.card-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.card-meta h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 19px; line-height: 1.15; letter-spacing: -0.02em; }
+.card-price { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.card-sub { margin: -4px 0 0; font-size: 13px; color: var(--soft); }
+.swatches { display: flex; flex-wrap: wrap; gap: 9px; }
+.sw {
+  position: relative; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: var(--s);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.16), inset 0 -3px 5px rgba(0,0,0,.1), inset 0 2px 4px rgba(255,255,255,.35);
+}
+.sw::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid var(--ink); opacity: 0; transition: opacity .2s ease; }
+.sw[aria-pressed="true"]::after { opacity: 1; }
+.card .btn { align-self: flex-start; padding: 11px 18px; font-size: 14px; margin-top: 2px; }
+
+/* ---------- Footer ---------- */
+.foot { padding-top: clamp(72px, 9vw, 120px); border-top: 1px solid var(--line); }
+.foot-top { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; }
+.signup h2 { font-size: clamp(30px, 3.6vw, 50px); margin-top: 0; }
+.signup p { margin: 0 0 22px; color: var(--soft); max-width: 44ch; }
+.field { display: flex; gap: 10px; max-width: 500px; }
+.field input {
+  flex: 1; min-width: 0; padding: 15px 20px; border-radius: 999px;
+  border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
+  font: 500 16px var(--body);
+}
+.field input::placeholder { color: var(--soft); }
+.form-msg { min-height: 1.5em; margin: 12px 0 0 !important; font-weight: 500; color: var(--ink) !important; }
+.foot-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.foot-links h3 { margin: 0 0 12px; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--soft); }
+.foot-links ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.foot-links a { text-decoration: none; font-size: 15px; }
+.foot-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.wordmark { margin-top: clamp(56px, 8vw, 110px); line-height: 0; overflow: hidden; }
+.wordmark span {
+  display: inline-block; font-family: var(--display); font-weight: 800; font-size: 300px;
+  line-height: .74; letter-spacing: -0.06em; white-space: nowrap; padding-bottom: .06em;
+}
+.foot-base {
+  display: flex; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap;
+  padding-block: 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line); margin-top: 18px; font-size: 13px; color: var(--soft);
+}
+
+/* ---------- Cart drawer & toast ---------- */
+.scrim { position: fixed; inset: 0; z-index: 35; background: rgba(12, 8, 14, .38); animation: fade .25s ease; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 40; width: min(420px, 100%);
+  display: flex; flex-direction: column; gap: 18px;
+  background: var(--bg1); color: var(--ink);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 22px);
+  padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  padding-left: 24px; padding-right: max(24px, env(safe-area-inset-right, 0px));
+  box-shadow: -24px 0 60px rgba(0,0,0,.2);
+  animation: slideIn .35s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; }
+.drawer-head h2 { font-size: 30px; margin: 0; }
+.link-btn { background: none; border: 0; padding: 6px 0; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.cart-list { list-style: none; margin: 0; padding: 0; flex: 1; overflow-y: auto; display: grid; align-content: start; gap: 0; }
+.cart-item { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.cart-thumb { width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center; background: radial-gradient(120% 90% at 50% 40%, color-mix(in srgb, var(--c) 9%, #FFFDFA), color-mix(in srgb, var(--c) 26%, #EEE8E1)); }
+.cart-thumb svg { width: 80%; height: auto; }
+.cart-item h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.cart-item p { margin: 2px 0 8px; font-size: 13px; color: var(--soft); }
+.qty { display: inline-flex; align-items: center; gap: 4px; border: 1.5px solid var(--line); border-radius: 999px; }
+.qty button { width: 30px; height: 30px; border: 0; background: none; cursor: pointer; font-size: 17px; border-radius: 50%; }
+.qty button:hover { background: var(--line); }
+.qty span { min-width: 20px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
+.line-price { font-weight: 600; font-variant-numeric: tabular-nums; }
+.empty { color: var(--soft); margin: 0; }
+.drawer-foot { display: grid; gap: 10px; }
+.subtotal { display: flex; justify-content: space-between; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.small { margin: 0; font-size: 13px; color: var(--soft); }
+.btn-block { width: 100%; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  max-width: calc(100% - 32px); padding: 13px 20px; border-radius: 999px;
+  background: var(--ink); color: var(--bg1); font-weight: 600; font-size: 14px; text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Quick view ---------- */
+.qv {
+  position: fixed; z-index: 45; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(940px, calc(100% - 48px)); max-height: calc(100% - 48px); overflow-y: auto;
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  background: var(--bg1); color: var(--ink); border-radius: 26px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.32);
+  animation: pop .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes pop { from { opacity: 0; transform: translate(-50%, -47%) scale(.98); } to { opacity: 1; transform: translate(-50%, -50%); } }
+@keyframes sheet { from { transform: translateY(100%); } to { transform: none; } }
+.qv-media {
+  position: relative; aspect-ratio: 1; max-width: 100%; display: grid; place-items: center;
+  background: radial-gradient(120% 90% at 50% 38%, color-mix(in srgb, var(--c, #E58BA6) 9%, #FFFDFA), color-mix(in srgb, var(--c, #E58BA6) 26%, #EEE8E1));
+}
+.qv-media .art { width: 72%; }
+#qv-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+#qv-canvas.dragging { cursor: grabbing; }
+.qv-tools { position: absolute; z-index: 2; left: 14px; bottom: 14px; display: flex; gap: 8px; }
+.qv-tools .vbtn { width: 40px; height: 40px; }
+.qv-hint {
+  position: absolute; z-index: 1; left: 0; right: 0; top: 18px; margin: 0; text-align: center; pointer-events: none;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(42, 30, 34, .62);
+  transition: opacity .5s ease;
+}
+.qv-hint.gone { opacity: 0; }
+.qv-info { padding: 36px 32px 32px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.qv-info h2 { margin: 0; font-size: clamp(30px, 3.4vw, 44px); padding-right: 40px; }
+.qv-price { margin: 0; font-family: var(--display); font-weight: 600; font-size: 24px; font-variant-numeric: tabular-nums; }
+.qv-desc { margin: 0; color: var(--soft); line-height: 1.6; max-width: 46ch; }
+.opt { border: 0; margin: 0; padding: 0; min-width: 0; }
+.opt legend {
+  padding: 0; margin-bottom: 12px; font-family: var(--mono); font-size: 12px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--soft);
+}
+.opt legend b { margin-left: 6px; font-family: var(--body); font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
+.qv .swatches { gap: 12px; padding-left: 4px; }
+.qv .sw { width: 30px; height: 30px; }
+.sizes { display: flex; flex-wrap: wrap; gap: 8px; }
+.size {
+  min-width: 52px; height: 44px; padding: 0 12px; border-radius: 12px; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.size:hover { border-color: var(--ink); }
+.size[aria-pressed="true"] { background: var(--ink); color: var(--bg1); border-color: var(--ink); }
+.opt-err { margin: 10px 0 0; min-height: 1.4em; font-size: 14px; font-weight: 600; }
+.qv-actions { display: grid; gap: 10px; margin-top: auto; padding-top: 4px; }
+.qv-close {
+  position: absolute; top: 14px; right: 14px; z-index: 2; width: 40px; height: 40px; padding: 0;
+  display: grid; place-items: center; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid var(--line); background: var(--glass); color: var(--ink);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); font-size: 22px; line-height: 1;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 901px) {
+  .mnav { display: none !important; }
+}
+@media (max-width: 720px) {
+  .qv {
+    left: 0; right: 0; top: auto; bottom: 0; transform: none; width: 100%; max-height: 92%;
+    grid-template-columns: minmax(0, 1fr); border-radius: 24px 24px 0 0;
+    animation: sheet .35s cubic-bezier(.2,.8,.2,1);
+  }
+  .qv-media { aspect-ratio: 1; max-height: 54vh; }
+  .qv-media .art { width: 50%; }
+  .qv-hint { top: 22px; padding-right: 56px; padding-left: 16px; }
+  .qv-info {
+    padding-top: 22px; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+}
+@media (max-width: 900px) {
+  .nav { display: none; }
+  .menu-btn { display: inline-flex; }
+  .details .inner, .foot-top { grid-template-columns: minmax(0, 1fr); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px), (max-height: 600px) {
+  .viewer {
+    top: calc(env(safe-area-inset-top, 0px) + 72px); transform: none;
+    left: var(--gl); right: var(--gr);
+    flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;
+  }
+  .vbtn { width: 40px; height: 40px; }
+  .readout { flex-basis: 100%; text-align: center; margin: 0; }
+  .hint { display: none; }
+}
+@media (max-width: 640px) {
+  .giant { padding-bottom: 20vh; }
+  .stage-ui { flex-direction: column; align-items: stretch; gap: 18px; }
+  .stage-right { align-items: stretch; }
+  .dots { justify-content: space-between; }
+  .buy { justify-content: space-between; }
+  .hs-card { max-width: 190px; }
+  .specs div { grid-template-columns: 110px minmax(0, 1fr); }
+  .grid { gap: 32px 12px; }
+  .card-meta { flex-direction: column; gap: 2px; }
+  .card-meta h3 { font-size: 17px; }
+  .card .btn { align-self: stretch; padding-inline: 10px; }
+  .panel { border-radius: 16px; }
+  .tag { left: 8px; top: 8px; font-size: 10px; }
+  .badge3d { right: 8px; top: 8px; font-size: 10px; padding: 4px 8px; }
+  .quick { display: none; }
+  .swatches { gap: 8px; }
+  .sw { width: 20px; height: 20px; }
+  .field { flex-direction: column; }
+  .foot-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0s !important; }
+}
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+
+<header class="site-head" id="site-head">
+  <a class="logo" href="#top" aria-label="Emmy home">emmy</a>
+  <nav class="nav" aria-label="Main">
+    <a href="#new" data-filter="new">New in</a>
+    <a href="#bags" data-filter="bags">Bags</a>
+    <a href="#shoes" data-filter="shoes">Shoes</a>
+    <a href="#clothes" data-filter="clothes">Clothes</a>
+    <a href="#accessories" data-filter="accessories">Accessories</a>
+  </nav>
+  <div class="head-actions">
+    <button class="cart-btn menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="mnav">Menu</button>
+    <button class="cart-btn" id="cart-open" type="button" aria-haspopup="dialog">Cart (<span id="cart-count">0</span>)</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav" aria-label="Shop categories" hidden>
+  <a href="#new" data-filter="new">New in</a>
+  <a href="#bags" data-filter="bags">Bags</a>
+  <a href="#shoes" data-filter="shoes">Shoes</a>
+  <a href="#clothes" data-filter="clothes">Clothes</a>
+  <a href="#accessories" data-filter="accessories">Accessories</a>
+  <a href="#all" data-filter="all">Shop everything</a>
+</nav>
+
+<main>
+  <section class="story" id="top" aria-label="The Emmy Top Handle in six colours">
+    <div class="stage" id="stage">
+      <div class="giant" aria-hidden="true"><span id="giant-word">bloom</span></div>
+      <canvas id="bag-canvas" aria-label="3D view of the Emmy Top Handle. Drag to turn it."></canvas>
+      <div class="fallback" id="fallback" hidden></div>
+      <div class="hotspots" id="hotspots"></div>
+
+      <div class="viewer" id="viewer" role="toolbar" aria-label="3D view controls">
+        <button class="vbtn" id="v-spin" type="button" aria-pressed="false" aria-label="Spin 360 degrees">360°</button>
+        <button class="vbtn" id="v-in" type="button" aria-label="Zoom in">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button class="vbtn" id="v-out" type="button" aria-label="Zoom out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+        </button>
+        <button class="vbtn" id="v-reset" type="button" aria-label="Reset view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg>
+        </button>
+        <button class="vbtn" id="v-dots" type="button" aria-pressed="true" aria-label="Show product details on the bag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="2.5" fill="currentColor"/><circle cx="12" cy="12" r="8"/></svg>
+        </button>
+        <p class="readout" id="readout" aria-live="off">Drag to turn</p>
+      </div>
+
+      <div class="stage-ui">
+        <div class="stage-left">
+          <p class="eyebrow"><span>The Emmy Top Handle</span><span id="colour-count">Colour 1 of 6</span></p>
+          <h1 class="colour-name"><span id="colour-name" style="display:inline-block">Blush Petal</span></h1>
+        </div>
+        <div class="stage-right">
+          <div class="dots" id="dots" role="group" aria-label="Choose a colour"></div>
+          <div class="buy">
+            <span class="price" id="hero-price">$240</span>
+            <button class="btn" id="hero-add" type="button">Add to cart</button>
+          </div>
+        </div>
+      </div>
+      <p class="hint eyebrow" id="hint"><i aria-hidden="true"></i>Scroll to see every colour</p>
+    </div>
+  </section>
+
+  <section class="details wrap" id="details">
+    <div class="inner">
+      <div>
+        <p class="eyebrow">The Emmy Top Handle</p>
+        <h2>One bag, six colours, made for every day.</h2>
+        <p class="lede">A structured top-handle bag cut from pebbled full-grain leather. It fits a phone, wallet, keys and a small water bottle, and the detachable strap turns it into a crossbody when your hands are full.</p>
+      </div>
+      <dl class="specs">
+        <div><dt>Leather</dt><dd>Pebbled full-grain cowhide</dd></div>
+        <div><dt>Size</dt><dd>26 × 19 × 11 cm</dd></div>
+        <div><dt>Handle drop</dt><dd>9 cm</dd></div>
+        <div><dt>Strap</dt><dd>Detachable, adjusts 105–120 cm</dd></div>
+        <div><dt>Hardware</dt><dd>Gold-tone brass turn-lock and feet</dd></div>
+        <div><dt>Weight</dt><dd>0.78 kg</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="shop wrap" id="shop" aria-labelledby="shop-title">
+    <div class="inner">
+      <div class="shop-head">
+        <div>
+          <p class="eyebrow">The Emmy edit</p>
+          <h2 id="shop-title">Shop Emmy</h2>
+        </div>
+        <p>Bags, shoes, clothes and accessories in colours that go together. Tap any piece to turn it in 3D.</p>
+      </div>
+      <div class="tabs" id="tabs" role="group" aria-label="Filter by category"></div>
+      <ul class="grid" id="grid"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="inner foot-top">
+      <form class="signup" id="signup" novalidate>
+        <h2>Get first dibs on new colours.</h2>
+        <p>One email when a new colour drops. Nothing else.</p>
+        <div class="field">
+          <label for="signup-email" class="sr-only">Email address</label>
+          <input id="signup-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+          <button class="btn" type="submit">Sign up</button>
+        </div>
+        <p class="form-msg" id="signup-msg" role="status"></p>
+      </form>
+      <nav class="foot-links" aria-label="Footer">
+        <div>
+          <h3>Shop</h3>
+          <ul><li><a href="#new" data-filter="new">New in</a></li><li><a href="#bags" data-filter="bags">Bags</a></li><li><a href="#shoes" data-filter="shoes">Shoes</a></li><li><a href="#clothes" data-filter="clothes">Clothes</a></li><li><a href="#accessories" data-filter="accessories">Accessories</a></li></ul>
+        </div>
+        <div>
+          <h3>Help</h3>
+          <ul><li><a href="#details">Delivery</a></li><li><a href="#details">Returns</a></li><li><a href="#details">Care guide</a></li><li><a href="#signup">Contact</a></li></ul>
+        </div>
+        <div>
+          <h3>Emmy</h3>
+          <ul><li><a href="#top">About</a></li><li><a href="#top">Stores</a></li><li><a href="#top">Instagram</a></li><li><a href="#top">TikTok</a></li></ul>
+        </div>
+      </nav>
+    </div>
+    <div class="inner wordmark" aria-hidden="true"><span id="wordmark">emmy</span></div>
+    <div class="inner foot-base">
+      <span>© 2026 Emmy Fashion Store</span>
+      <span>Prices shown in US dollars</span>
+    </div>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+  <div class="drawer-head">
+    <h2 id="drawer-title">Your cart</h2>
+    <button class="link-btn" id="cart-close" type="button">Close</button>
+  </div>
+  <ul class="cart-list" id="cart-list"></ul>
+  <p class="empty" id="cart-empty">Your cart is empty. Pick a colour to get started.</p>
+  <div class="drawer-foot">
+    <div class="subtotal"><span>Subtotal</span><span id="subtotal">$0</span></div>
+    <p class="small">Delivery and taxes are added at checkout.</p>
+    <button class="btn btn-block" id="checkout" type="button">Checkout</button>
+  </div>
+</aside>
+<div class="scrim" id="qv-scrim" hidden></div>
+<div class="qv" id="qv" role="dialog" aria-modal="true" aria-labelledby="qv-title" hidden>
+  <button class="qv-close" id="qv-close" type="button" aria-label="Close quick view">×</button>
+  <div class="qv-media" id="qv-media">
+    <span class="art" id="qv-art"></span>
+    <canvas id="qv-canvas" aria-label="3D view of this piece. Drag to turn it." hidden></canvas>
+    <p class="qv-hint" id="qv-hint" hidden>Drag to turn · Pinch to zoom</p>
+    <div class="qv-tools" id="qv-tools" role="toolbar" aria-label="3D view controls" hidden>
+      <button class="vbtn" id="qv-spin" type="button" aria-pressed="true" aria-label="Spin 360 degrees">360°</button>
+      <button class="vbtn" id="qv-out" type="button" aria-label="Zoom out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      </button>
+      <button class="vbtn" id="qv-in" type="button" aria-label="Zoom in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button class="vbtn" id="qv-reset" type="button" aria-label="Reset view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="qv-info">
+    <p class="eyebrow" id="qv-cat">Bags</p>
+    <h2 id="qv-title">Emmy Top Handle</h2>
+    <p class="qv-price" id="qv-price">$240</p>
+    <p class="qv-desc" id="qv-desc"></p>
+    <fieldset class="opt">
+      <legend>Colour <b id="qv-colour-name"></b></legend>
+      <div class="swatches" id="qv-colours"></div>
+    </fieldset>
+    <fieldset class="opt" id="qv-size-wrap">
+      <legend id="qv-size-label">Size</legend>
+      <div class="sizes" id="qv-sizes"></div>
+      <p class="opt-err" id="qv-err" role="alert"></p>
+    </fieldset>
+    <div class="qv-actions">
+      <button class="btn btn-block" id="qv-add" type="button">Add to cart</button>
+      <button class="btn btn-line btn-block" id="qv-3d" type="button" hidden>Watch it change colour</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  const PRICE = 240;
+  const COLOURS = [
+    { id: 'blush',  name: 'Blush Petal',   word: 'bloom',    bag: '#E58BA6', bg1: '#FDE9EF', bg2: '#F5C3D3', ink: '#3B0F21', wordC: '#F0A7BE' },
+    { id: 'butter', name: 'Butter Yellow', word: 'sunday',   bag: '#F0C94F', bg1: '#FFF7DA', bg2: '#F6E096', ink: '#3A2D05', wordC: '#F2D46E' },
+    { id: 'sage',   name: 'Sage Leaf',     word: 'garden',   bag: '#8DAA86', bg1: '#EEF3EA', bg2: '#CCDBC5', ink: '#18261A', wordC: '#B3C8AC' },
+    { id: 'cobalt', name: 'Cobalt Blue',   word: 'riviera',  bag: '#2D55CF', bg1: '#E5ECFF', bg2: '#B3C4FA', ink: '#0B1846', wordC: '#9BB0F3' },
+    { id: 'cherry', name: 'Cherry Red',    word: 'amour',    bag: '#B5162F', bg1: '#FDE7E6', bg2: '#F1B2B4', ink: '#3A0610', wordC: '#E9959B' },
+    { id: 'night',  name: 'After Hours',   word: 'midnight', bag: '#1F1C23', bg1: '#2E2A34', bg2: '#141317', ink: '#F4EEF7', wordC: '#433D4C' },
+  ];
+  // Detail points on the bag, in bag units before centring (1 unit = 10 cm).
+  const HOTSPOTS = [
+    { title: 'Turn-lock clasp', text: 'Solid brass with a gold-tone finish.', pos: [0, 0.8, 0.74], n: [0, 0, 1], min: 0.12 },
+    { title: 'Pebbled leather', text: 'Full-grain cowhide that softens with wear.', pos: [-0.72, 0.36, 0.57], n: [0, 0, 1], min: 0.12 },
+    { title: 'Rolled top handle', text: '9 cm drop, stitched by hand.', pos: [0, 2.69, 0], n: [0, 1, 0], min: -0.5 },
+    { title: 'Strap rings', text: 'Clip on the detachable crossbody strap.', pos: [1.27, 1.5, 0], n: [1, 0, 0], min: 0.12 },
+    { title: 'Back slip pocket', text: 'Fits a phone or a travel card.', pos: [0.45, 0.72, -0.64], n: [0, 0, -1], min: 0.12 },
+    { title: 'Brass feet', text: 'Keep the base clean when you set it down.', pos: [0.85, -0.19, 0.3], n: [0, -1, 0], min: 0.12 },
+  ];
+  const N = COLOURS.length;
+  const TAU = Math.PI * 2;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const narrowMQ = window.matchMedia('(max-width: 640px), (max-height: 600px)');
+
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const money = (n) => '$' + n.toLocaleString('en-US');
+
+  const story = $('#top'), stage = $('#stage'), head = $('#site-head');
+  const giantEl = $('#giant-word'), nameEl = $('#colour-name'), countEl = $('#colour-count');
+  const hint = $('#hint'), heroAdd = $('#hero-add'), dotsWrap = $('#dots'), readout = $('#readout');
+
+  /* ---------- Product drawings (swap for photos later) ---------- */
+  const SH = 'rgba(0,0,0,.14)', HL = 'rgba(255,255,255,.3)', GOLD = '#C9A55A', GOLD2 = '#E7CB86', SOLE = '#EAE0D3';
+  const ribs = (x0, x1, y0, y1, step) => { let d = ''; for (let x = x0; x <= x1; x += step) d += `M${x} ${y0}V${y1}`; return d; };
+  const ART = {
+    topHandle: (c) => `<g transform="translate(0 12)">
+      <path d="M72 66 C72 12 128 12 128 66" fill="none" stroke="${c}" stroke-width="11" stroke-linecap="round"/>
+      <rect x="64" y="58" width="16" height="11" rx="3" fill="${GOLD}"/>
+      <rect x="120" y="58" width="16" height="11" rx="3" fill="${GOLD}"/>
+      <path d="M50 66 H150 Q158 66 160 74 L174 150 Q177 167 160 167 H40 Q23 167 26 150 L40 74 Q42 66 50 66 Z" fill="${c}"/>
+      <path d="M47 68 H153 L159 106 Q161 122 145 122 H55 Q39 122 41 106 Z" fill="rgba(0,0,0,.10)" stroke="rgba(255,255,255,.24)" stroke-width="1.5"/>
+      <rect x="86" y="112" width="28" height="17" rx="6" fill="${GOLD}"/>
+      <rect x="93" y="118" width="14" height="5" rx="2.5" fill="${GOLD2}"/></g>`,
+    crossbody: (c) => `
+      <path d="M60 96 C52 20 148 20 140 96" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M60 96 C52 20 148 20 140 96" fill="none" stroke="${SH}" stroke-width="5" stroke-linecap="round"/>
+      <rect x="54" y="88" width="12" height="11" rx="3" fill="${GOLD}"/>
+      <rect x="134" y="88" width="12" height="11" rx="3" fill="${GOLD}"/>
+      <rect x="44" y="94" width="112" height="80" rx="20" fill="${c}"/>
+      <path d="M44 114 Q44 94 64 94 H136 Q156 94 156 114 V126 L100 148 L44 126 Z" fill="${SH}" stroke="${HL}" stroke-width="1.5"/>
+      <circle cx="100" cy="142" r="7.5" fill="${GOLD}"/><circle cx="100" cy="142" r="3" fill="${GOLD2}"/>`,
+    tote: (c) => `
+      <path d="M62 76 C62 26 92 26 92 76 M108 76 C108 26 138 26 138 76" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M62 76 C62 26 92 26 92 76 M108 76 C108 26 138 26 138 76" fill="none" stroke="${SH}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M38 72 H162 L172 176 Q173 186 163 186 H37 Q27 186 28 176 Z" fill="${c}"/>
+      <path d="M38 72 H162 L163.4 86 H36.6 Z" fill="${SH}"/>
+      <rect x="70" y="108" width="60" height="44" rx="6" fill="none" stroke="${HL}" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <circle cx="62" cy="80" r="3.5" fill="${GOLD}"/><circle cx="92" cy="80" r="3.5" fill="${GOLD}"/>
+      <circle cx="108" cy="80" r="3.5" fill="${GOLD}"/><circle cx="138" cy="80" r="3.5" fill="${GOLD}"/>`,
+    mule: (c) => `
+      <path d="M36 122 H66 L61 172 H45 Z" fill="${c}"/>
+      <path d="M36 122 H66 L61 172 H45 Z" fill="rgba(0,0,0,.22)"/>
+      <path d="M34 122 L68 122 C96 126 116 154 144 158 L178 160 Q188 161 188 168 V172 H142 C114 170 94 142 68 132 L34 130 Z" fill="${SOLE}" stroke="rgba(0,0,0,.12)" stroke-width="1"/>
+      <path d="M100 144 C106 112 150 106 176 136 Q187 149 188 164 L144 160 C126 158 112 152 100 144 Z" fill="${c}"/>
+      <path d="M106 136 C118 116 148 114 170 134" fill="none" stroke="${HL}" stroke-width="2" stroke-linecap="round"/>`,
+    flat: (c) => `
+      <path d="M24 152 Q22 134 42 134 L92 136 Q124 138 154 142 Q186 146 188 162 Q188 172 174 172 H38 Q24 172 24 152 Z" fill="${c}"/>
+      <path d="M25 162 H188 Q188 172 174 172 H38 Q26 172 25 162 Z" fill="rgba(0,0,0,.2)"/>
+      <path d="M38 138 Q86 156 134 141 Q88 130 38 138 Z" fill="rgba(0,0,0,.34)"/>
+      <path d="M140 140 q-12 -12 -20 -1 q8 11 20 1 Z M140 140 q12 -12 20 -1 q-8 11 -20 1 Z" fill="${c}" stroke="${SH}" stroke-width="2"/>
+      <circle cx="140" cy="140" r="3.5" fill="${SH}"/>
+      <path d="M150 146 Q172 150 182 160" fill="none" stroke="${HL}" stroke-width="2" stroke-linecap="round"/>`,
+    sneaker: (c) => `
+      <path d="M22 146 H184 Q190 146 190 154 V164 Q190 174 180 174 H32 Q22 174 22 164 Z" fill="#F7F2EA" stroke="rgba(0,0,0,.14)" stroke-width="1.5"/>
+      <path d="M23 160 H189" stroke="rgba(0,0,0,.1)" stroke-width="1.5"/>
+      <path d="M28 146 Q24 110 50 102 L80 96 Q96 93 104 106 L122 126 Q160 128 178 138 Q188 143 186 146 Z" fill="${c}"/>
+      <path d="M150 131 Q178 136 186 146 H146 Q143 138 150 131 Z" fill="${SH}"/>
+      <path d="M28 146 Q25 122 38 108 L48 146 Z" fill="${SH}"/>
+      <path d="M91 109 L101 99 M99 116 L109 106 M107 123 L117 113" stroke="rgba(0,0,0,.18)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M91 109 L101 99 M99 116 L109 106 M107 123 L117 113" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="66" cy="128" r="6" fill="${HL}"/>`,
+    sandal: (c) => `
+      <path d="M38 118 H58 L55 172 H46 Z" fill="${c}"/>
+      <path d="M38 118 H58 L55 172 H46 Z" fill="rgba(0,0,0,.25)"/>
+      <path d="M34 118 L60 118 C92 122 114 154 144 158 L178 160 Q188 161 188 168 V172 H142 C114 170 92 140 60 128 L34 126 Z" fill="${SOLE}" stroke="rgba(0,0,0,.12)" stroke-width="1"/>
+      <path d="M42 118 Q36 98 50 90" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="66" cy="88" rx="22" ry="7" fill="none" stroke="${c}" stroke-width="6"/>
+      <rect x="82" y="82" width="10" height="12" rx="2" fill="none" stroke="${GOLD}" stroke-width="2.5"/>
+      <path d="M116 150 Q132 122 156 152" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M144 158 Q160 134 182 160" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round"/>`,
+    dress: (c) => `
+      <path d="M76 28 Q100 42 124 28 L142 38 L154 76 L136 82 L131 66 Q127 90 134 104 L164 186 H36 L66 104 Q73 90 69 66 L64 82 L46 76 L58 38 Z" fill="${c}"/>
+      <path d="M78 30 L100 72 L122 30 Q100 44 78 30 Z" fill="rgba(0,0,0,.18)"/>
+      <path d="M82 36 L132 102" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
+      <path d="M67 97 H133 L134.6 107 H65.4 Z" fill="${SH}"/>
+      <path d="M122 106 Q128 128 118 146 M128 106 Q140 126 134 144" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M122 106 Q128 128 118 146 M128 106 Q140 126 134 144" fill="none" stroke="${SH}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M90 110 L80 184 M112 110 L124 184" stroke="rgba(0,0,0,.08)" stroke-width="3"/>`,
+    shirt: (c) => `
+      <path d="M70 34 L88 26 Q100 34 112 26 L130 34 L170 64 L156 90 L140 78 V178 H60 V78 L44 90 L30 64 Z" fill="${c}"/>
+      <path d="M100 44 V178" stroke="${SH}" stroke-width="2"/>
+      ${[64, 88, 112, 136, 160].map((y) => `<circle cx="104" cy="${y}" r="2.6" fill="${HL}" stroke="${SH}" stroke-width="1"/>`).join('')}
+      <rect x="112" y="72" width="18" height="21" rx="2" fill="none" stroke="${SH}" stroke-width="1.5"/>
+      <path d="M88 26 L100 44 L92 56 L78 34 Z M112 26 L100 44 L108 56 L122 34 Z" fill="${c}" stroke="${SH}" stroke-width="1.5"/>
+      <path d="M36 61 L50 87 M164 61 L150 87" stroke="${SH}" stroke-width="4"/>`,
+    trousers: (c) => `
+      <path d="M62 24 H138 L152 184 H108 L100 86 L92 184 H48 Z" fill="${c}"/>
+      <rect x="62" y="24" width="76" height="13" fill="${SH}"/>
+      <circle cx="100" cy="30.5" r="2.6" fill="${HL}"/>
+      <path d="M100 37 V84" stroke="${SH}" stroke-width="1.5"/>
+      <path d="M68 37 Q74 52 70 62 M132 37 Q126 52 130 62" fill="none" stroke="${SH}" stroke-width="1.5"/>
+      <path d="M82 37 L72 184 M118 37 L128 184" stroke="rgba(0,0,0,.1)" stroke-width="2.5"/>`,
+    cardigan: (c) => `
+      <path d="M64 40 L86 30 Q100 46 114 30 L136 40 L168 96 L160 142 L146 140 L150 100 L140 86 V148 H60 V86 L50 100 L54 140 L40 142 L32 96 Z" fill="${c}"/>
+      <path d="M86 30 L100 104 L114 30 Q100 46 86 30 Z" fill="rgba(0,0,0,.2)"/>
+      <path d="M100 104 V148" stroke="${SH}" stroke-width="2"/>
+      <rect x="60" y="138" width="80" height="10" fill="${SH}"/>
+      <path d="${ribs(64, 136, 139, 147, 6)}" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
+      <path d="M40 142 L54 140 L53.4 132 L39 134 Z M160 142 L146 140 L146.6 132 L161 134 Z" fill="${SH}"/>
+      <circle cx="104" cy="114" r="3.2" fill="${GOLD}"/><circle cx="104" cy="127" r="3.2" fill="${GOLD}"/>`,
+    scarf: (c) => `
+      <path d="M100 26 L174 100 L100 174 L26 100 Z" fill="${c}"/>
+      <path d="M100 26 L174 100 L100 174 Z" fill="rgba(0,0,0,.06)"/>
+      <path d="M100 42 L158 100 L100 158 L42 100 Z" fill="none" stroke="${HL}" stroke-width="4"/>
+      <path d="M100 56 L144 100 L100 144 L56 100 Z" fill="none" stroke="${GOLD}" stroke-width="2"/>
+      <circle cx="100" cy="100" r="16" fill="${GOLD}"/>
+      <circle cx="100" cy="100" r="7" fill="${c}"/>
+      <circle cx="100" cy="72" r="4" fill="${HL}"/><circle cx="128" cy="100" r="4" fill="${HL}"/>
+      <circle cx="100" cy="128" r="4" fill="${HL}"/><circle cx="72" cy="100" r="4" fill="${HL}"/>`,
+    hoops: (c) => `<g fill="none" stroke-linecap="round">
+      <circle cx="76" cy="116" r="34" stroke="rgba(0,0,0,.14)" stroke-width="8" transform="translate(2 4)"/>
+      <circle cx="76" cy="116" r="34" stroke="${c}" stroke-width="8"/>
+      <path d="M50 96 A34 34 0 0 1 76 82" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
+      <circle cx="128" cy="100" r="34" stroke="rgba(0,0,0,.14)" stroke-width="8" transform="translate(2 4)"/>
+      <circle cx="128" cy="100" r="34" stroke="${c}" stroke-width="8"/>
+      <path d="M102 80 A34 34 0 0 1 128 66" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/></g>`,
+    sunglasses: (c) => `
+      <path d="M18 80 Q40 70 88 82 Q96 84 96 94 Q94 124 66 126 Q36 128 28 104 Q24 92 18 80 Z" fill="${c}"/>
+      <path d="M182 80 Q160 70 112 82 Q104 84 104 94 Q106 124 134 126 Q164 128 172 104 Q176 92 182 80 Z" fill="${c}"/>
+      <path d="M92 88 Q100 80 108 88" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round"/>
+      <path d="M30 86 Q48 80 84 88 Q90 90 89 97 Q87 118 65 119 Q42 120 35 103 Q32 94 30 86 Z" fill="rgba(24,18,28,.82)"/>
+      <path d="M170 86 Q152 80 116 88 Q110 90 111 97 Q113 118 135 119 Q158 120 165 103 Q168 94 170 86 Z" fill="rgba(24,18,28,.82)"/>
+      <path d="M44 94 L60 91 M130 92 L146 90" stroke="rgba(255,255,255,.38)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M18 80 Q40 70 88 82 M182 80 Q160 70 112 82" fill="none" stroke="${HL}" stroke-width="1.5"/>
+      <circle cx="24" cy="84" r="2.5" fill="${GOLD}"/><circle cx="176" cy="84" r="2.5" fill="${GOLD}"/>`,
+    belt: (c) => `<g transform="rotate(-12 100 100)">
+      <path d="M34 88 H168 L184 100 L168 112 H34 Z" fill="${c}"/>
+      <path d="M74 92.5 H166 M74 107.5 H166" stroke="${HL}" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <circle cx="128" cy="100" r="2.8" fill="rgba(0,0,0,.45)" stroke="${HL}" stroke-width="1"/>
+      <circle cx="140" cy="100" r="2.8" fill="rgba(0,0,0,.45)" stroke="${HL}" stroke-width="1"/>
+      <circle cx="152" cy="100" r="2.8" fill="rgba(0,0,0,.45)" stroke="${HL}" stroke-width="1"/>
+      <rect x="60" y="85" width="10" height="30" rx="2" fill="${SH}" stroke="${HL}" stroke-width="1"/>
+      <rect x="20" y="80" width="34" height="40" rx="8" fill="none" stroke="${GOLD}" stroke-width="6"/>
+      <path d="M23 100 H46" stroke="${GOLD2}" stroke-width="4" stroke-linecap="round"/></g>`,
+  };
+  const art = (kind, c) => `<svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">${ART[kind](c)}</svg>`;
+  const bagSVG = (c) => art('topHandle', c);
+
+  /* ---------- Catalogue ---------- */
+  const PAL = {};
+  COLOURS.forEach((c) => { PAL[c.id] = [c.name, c.bag]; });
+  Object.assign(PAL, { camel: ['Camel', '#C08A55'], cream: ['Cream', '#EFE6D6'], gold: ['Gold', '#D2A956'], silver: ['Silver', '#C3C8D0'] });
+  const pick = (...ids) => ids.map((id) => PAL[id]);
+  const CATS = { bags: 'Bags', shoes: 'Shoes', clothes: 'Clothes', accessories: 'Accessories' };
+  const SIZES = {
+    shoes: { label: 'Size (EU)', opts: ['36', '37', '38', '39', '40', '41'], show: (s) => 'EU ' + s },
+    clothes: { label: 'Size', opts: ['XS', 'S', 'M', 'L', 'XL'], show: (s) => 'Size ' + s },
+    belt: { label: 'Size', opts: ['S', 'M', 'L'], show: (s) => 'Size ' + s },
+  };
+  // Placeholder products, prices and details: replace with the real range.
+  const PRODUCTS = [
+    { id: 'top-handle', art: 'topHandle', cat: 'bags', name: 'Emmy Top Handle', price: 240, tag: 'Bestseller', in3d: true,
+      colours: COLOURS.map((c) => [c.name, c.bag]),
+      desc: 'Structured pebbled leather with a gold turn-lock and a detachable strap. 26 × 19 × 11 cm.' },
+    { id: 'mini-crossbody', art: 'crossbody', cat: 'bags', name: 'Mini Crossbody', price: 165, tag: 'New',
+      colours: pick('cherry', 'camel', 'night'),
+      desc: 'Holds a phone, cards and a lipstick. The strap adjusts up to 120 cm.' },
+    { id: 'weekend-tote', art: 'tote', cat: 'bags', name: 'Weekend Tote', price: 210,
+      colours: pick('camel', 'sage', 'cream'),
+      desc: 'Fits a 14-inch laptop, with an inner zip pocket and an open top.' },
+    { id: 'block-mule', art: 'mule', cat: 'shoes', name: 'Block-Heel Mule', price: 145, tag: 'New', sizes: 'shoes',
+      colours: pick('blush', 'night', 'camel'),
+      desc: 'Square toe, 6 cm block heel and a padded leather footbed.' },
+    { id: 'ballet-flat', art: 'flat', cat: 'shoes', name: 'Bow Ballet Flat', price: 120, sizes: 'shoes',
+      colours: pick('cherry', 'cream', 'night'),
+      desc: 'Soft leather with a small bow and a flexible rubber sole.' },
+    { id: 'platform-sneaker', art: 'sneaker', cat: 'shoes', name: 'Platform Sneaker', price: 135, sizes: 'shoes',
+      colours: pick('cream', 'sage', 'cobalt'),
+      desc: 'Leather upper on a 4 cm cushioned platform.' },
+    { id: 'strappy-sandal', art: 'sandal', cat: 'shoes', name: 'Strappy Sandal', price: 110, sizes: 'shoes',
+      colours: pick('butter', 'camel', 'night'),
+      desc: 'Ankle strap with a brass buckle and a 5 cm heel.' },
+    { id: 'wrap-dress', art: 'dress', cat: 'clothes', name: 'Wrap Midi Dress', price: 160, tag: 'New', sizes: 'clothes',
+      colours: pick('cobalt', 'blush', 'night'),
+      desc: 'Flowing crepe with a tie waist that falls just below the knee.' },
+    { id: 'linen-shirt', art: 'shirt', cat: 'clothes', name: 'Linen Shirt', price: 85, sizes: 'clothes',
+      colours: pick('cream', 'sage', 'cobalt'),
+      desc: 'Relaxed fit in breathable linen with a chest pocket.' },
+    { id: 'wide-trousers', art: 'trousers', cat: 'clothes', name: 'Wide-Leg Trousers', price: 110, sizes: 'clothes',
+      colours: pick('camel', 'night', 'cream'),
+      desc: 'High waist, front pleats and a full-length wide leg.' },
+    { id: 'cropped-cardigan', art: 'cardigan', cat: 'clothes', name: 'Cropped Cardigan', price: 95, tag: 'New', sizes: 'clothes',
+      colours: pick('butter', 'blush', 'sage'),
+      desc: 'Soft cotton knit with gold buttons and ribbed cuffs.' },
+    { id: 'silk-scarf', art: 'scarf', cat: 'accessories', name: 'Silk Square Scarf', price: 65,
+      colours: pick('cherry', 'cobalt', 'butter'),
+      desc: 'Pure silk, 90 × 90 cm, with a hand-rolled edge.' },
+    { id: 'hoop-earrings', art: 'hoops', cat: 'accessories', name: 'Hoop Earrings', price: 55, tag: 'Bestseller',
+      colours: pick('gold', 'silver'),
+      desc: 'Lightweight 30 mm hoops in plated brass.' },
+    { id: 'cat-eye-sunglasses', art: 'sunglasses', cat: 'accessories', name: 'Cat-Eye Sunglasses', price: 90,
+      colours: pick('night', 'cherry', 'camel'),
+      desc: 'UV400 lenses in an acetate frame. Comes with a case.' },
+    { id: 'leather-belt', art: 'belt', cat: 'accessories', name: 'Leather Belt', price: 70, sizes: 'belt',
+      colours: pick('night', 'camel', 'cherry'),
+      desc: '3 cm wide with a gold-tone buckle.' },
+  ];
+  const byId = {};
+  PRODUCTS.forEach((p) => { byId[p.id] = p; });
+
+  /* ---------- Colour dots ---------- */
+  COLOURS.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'dot';
+    b.style.setProperty('--c', c.bag);
+    b.setAttribute('aria-label', 'Show ' + c.name);
+    b.setAttribute('aria-pressed', String(i === 0));
+    b.addEventListener('click', () => scrollToColour(i));
+    dotsWrap.appendChild(b);
+  });
+  const dots = Array.from(dotsWrap.children);
+
+  /* ---------- Shop grid ---------- */
+  const grid = $('#grid'), tabs = $('#tabs');
+  const swatchRow = (p, ci) => p.colours.map((col, i) =>
+    `<button class="sw" type="button" style="--s:${col[1]}" data-ci="${i}" aria-label="${col[0]}" aria-pressed="${i === ci}"></button>`).join('');
+  const cardColour = {};
+  grid.innerHTML = PRODUCTS.map((p) => {
+    cardColour[p.id] = 0;
+    const [cn, ch] = p.colours[0];
+    return `
+    <li class="card" data-id="${p.id}" style="--c:${ch}">
+      <button class="panel" type="button" data-open aria-label="View ${p.name} in 3D">
+        ${p.tag ? `<span class="tag">${p.tag}</span>` : ''}
+        <span class="badge3d" aria-hidden="true">3D</span>
+        <span class="art">${art(p.art, ch)}</span>
+        <span class="quick">View in 3D</span>
+      </button>
+      <div class="card-meta"><h3>${p.name}</h3><span class="card-price">${money(p.price)}</span></div>
+      <p class="card-sub">${cn}</p>
+      <div class="swatches" role="group" aria-label="Colours for ${p.name}">${swatchRow(p, 0)}</div>
+      <button class="btn btn-line" type="button" data-add>${p.sizes ? 'Choose size' : 'Add to cart'}</button>
+    </li>`;
+  }).join('');
+
+  function setCardColour(card, ci) {
+    const p = byId[card.dataset.id];
+    const [cn, ch] = p.colours[ci];
+    cardColour[p.id] = ci;
+    card.style.setProperty('--c', ch);
+    card.querySelector('.art').innerHTML = art(p.art, ch);
+    card.querySelector('.card-sub').textContent = cn;
+    card.querySelectorAll('.sw').forEach((s, i) => s.setAttribute('aria-pressed', String(i === ci)));
+  }
+  grid.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    const p = byId[card.dataset.id], ci = cardColour[p.id];
+    const sw = e.target.closest('.sw');
+    if (sw) { setCardColour(card, Number(sw.dataset.ci)); return; }
+    if (e.target.closest('[data-open]')) { openQuick(p.id, ci, false); return; }
+    if (e.target.closest('[data-add]')) {
+      if (p.sizes) openQuick(p.id, ci, true);
+      else addToCart(p.id, ci, null);
+    }
+  });
+
+  // Category tabs; the same names work as links (#shoes, #clothes …).
+  const FILTERS = [['all', 'All'], ['new', 'New in'], ['bags', 'Bags'], ['shoes', 'Shoes'], ['clothes', 'Clothes'], ['accessories', 'Accessories']];
+  const FILTER_IDS = FILTERS.map((f) => f[0]);
+  const matches = (p, f) => f === 'all' || (f === 'new' ? p.tag === 'New' : p.cat === f);
+  tabs.innerHTML = FILTERS.map(([f, label]) =>
+    `<button class="tab" type="button" data-tab="${f}" aria-pressed="${f === 'all'}">${label} <span>${PRODUCTS.filter((p) => matches(p, f)).length}</span></button>`).join('');
+  function setFilter(f) {
+    if (!FILTER_IDS.includes(f)) f = 'all';
+    tabs.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-pressed', String(t.dataset.tab === f)));
+    grid.querySelectorAll('.card').forEach((card) => { card.hidden = !matches(byId[card.dataset.id], f); });
+    $('#shop-title').textContent = f === 'all' ? 'Shop Emmy' : FILTERS.find((x) => x[0] === f)[1];
+    // Keep the chosen tab in view when the tab row scrolls sideways on phones.
+    const on = tabs.querySelector('[aria-pressed="true"]');
+    if (on) tabs.scrollLeft = Math.max(0, on.offsetLeft - tabs.offsetLeft - 16);
+  }
+  tabs.addEventListener('click', (e) => { const t = e.target.closest('[data-tab]'); if (t) setFilter(t.dataset.tab); });
+
+  /* ---------- Big type fitting ---------- */
+  function fit(el, maxW, maxFont) {
+    el.style.fontSize = '100px';
+    const w = el.getBoundingClientRect().width;
+    if (!w) return;
+    el.style.fontSize = Math.min((100 * maxW) / w, maxFont) + 'px';
+  }
+  const fitGiant = () => fit(giantEl, stage.clientWidth * 0.94, stage.clientHeight * 0.42);
+  const fitWordmark = () => { const wm = $('#wordmark'); fit(wm, wm.parentElement.clientWidth * 0.985, 2000); };
+
+  /* ---------- Active colourway ---------- */
+  let active = -1;
+  function swapText(el, text) {
+    if (el.textContent === text) return;
+    el.textContent = text;
+    el.classList.remove('swap');
+    void el.offsetWidth;
+    el.classList.add('swap');
+  }
+  function setActive(k) {
+    if (k === active) return;
+    active = k;
+    const c = COLOURS[k];
+    const s = document.documentElement.style;
+    s.setProperty('--bg1', c.bg1);
+    s.setProperty('--bg2', c.bg2);
+    s.setProperty('--ink', c.ink);
+    s.setProperty('--word', c.wordC);
+    s.setProperty('--accent', c.bag);
+    swapText(nameEl, c.name);
+    swapText(giantEl, c.word);
+    fitGiant();
+    countEl.textContent = `Colour ${k + 1} of ${N}`;
+    dots.forEach((d, i) => d.setAttribute('aria-pressed', String(i === k)));
+    heroAdd.setAttribute('aria-label', `Add ${c.name} to cart`);
+    if (three) three.setPearl(k);
+  }
+
+  function scrollToColour(k) {
+    const top = story.getBoundingClientRect().top + window.scrollY;
+    const total = Math.max(1, story.offsetHeight - window.innerHeight);
+    window.scrollTo({ top: top + (k / (N - 1)) * total, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  /* ---------- Cart ---------- */
+  const cart = new Map();
+  const cartList = $('#cart-list'), drawer = $('#drawer'), scrim = $('#scrim');
+  let lastFocus = null;
+
+  // Each cart line is one product in one colour and size.
+  const keyOf = (id, ci, size) => [id, ci, size || ''].join('|');
+  function addToCart(id, ci, size) {
+    const k = keyOf(id, ci, size);
+    cart.set(k, (cart.get(k) || 0) + 1);
+    renderCart();
+    const p = byId[id];
+    toast(`Added ${p.name}${p.colours.length > 1 ? ' in ' + p.colours[ci][0] : ''} to your cart`);
+  }
+  function renderCart() {
+    let count = 0, total = 0;
+    const rows = [];
+    cart.forEach((q, k) => {
+      const parts = k.split('|'), p = byId[parts[0]], ci = Number(parts[1]), size = parts[2];
+      const [cn, ch] = p.colours[ci];
+      count += q;
+      total += q * p.price;
+      rows.push(`
+        <li class="cart-item" style="--c:${ch}">
+          <div class="cart-thumb">${art(p.art, ch)}</div>
+          <div>
+            <h3>${p.name}</h3>
+            <p>${cn}${size ? ' · ' + SIZES[p.sizes].show(size) : ''}</p>
+            <div class="qty">
+              <button type="button" data-dec="${k}" aria-label="Remove one ${p.name}">−</button>
+              <span>${q}</span>
+              <button type="button" data-inc="${k}" aria-label="Add one more ${p.name}">+</button>
+            </div>
+          </div>
+          <span class="line-price">${money(q * p.price)}</span>
+        </li>`);
+    });
+    cartList.innerHTML = rows.join('');
+    $('#cart-count').textContent = count;
+    $('#subtotal').textContent = money(total);
+    $('#cart-empty').hidden = count > 0;
+  }
+
+  /* ---------- Quick view ---------- */
+  const qv = $('#qv'), qvScrim = $('#qv-scrim');
+  const qs = { id: null, ci: 0, size: null };
+  let qvReturn = null;
+  function openQuick(id, ci, wantSize) {
+    const p = byId[id], sz = p.sizes ? SIZES[p.sizes] : null;
+    qs.id = id;
+    qs.ci = ci || 0;
+    qs.size = null;
+    qvReturn = document.activeElement;
+    $('#qv-cat').textContent = CATS[p.cat] + (p.tag ? ' · ' + p.tag : '');
+    $('#qv-title').textContent = p.name;
+    $('#qv-price').textContent = money(p.price);
+    $('#qv-desc').textContent = p.desc;
+    $('#qv-colours').innerHTML = swatchRow(p, qs.ci);
+    $('#qv-size-wrap').hidden = !sz;
+    if (sz) {
+      $('#qv-size-label').textContent = sz.label;
+      $('#qv-sizes').innerHTML = sz.opts.map((s) => `<button class="size" type="button" data-size="${s}" aria-pressed="false">${s}</button>`).join('');
+    }
+    $('#qv-err').textContent = '';
+    $('#qv-3d').hidden = !p.in3d;
+    paintQuick();
+    qv.hidden = false;
+    qvScrim.hidden = false;
+    qv.scrollTop = 0;
+    // Show the 3D model; fall back to the drawing if 3D isn't available.
+    const viewer = getViewer();
+    let in3d = false;
+    if (viewer) {
+      try { viewer.open(p, p.colours[qs.ci][1]); in3d = true; } catch (err) { console.warn('3D model failed for ' + p.id, err); viewer.close(); }
+    }
+    $('#qv-art').hidden = in3d;
+    ['#qv-canvas', '#qv-tools', '#qv-hint'].forEach((s) => { $(s).hidden = !in3d; });
+    $('#qv-hint').classList.remove('gone');
+    const first = wantSize && sz ? qv.querySelector('.size') : $('#qv-close');
+    if (first) first.focus();
+  }
+  function paintQuick() {
+    const p = byId[qs.id], [cn, ch] = p.colours[qs.ci];
+    qv.style.setProperty('--c', ch);
+    $('#qv-art').innerHTML = art(p.art, ch);
+    if (pv) pv.setColour(ch);
+    $('#qv-colour-name').textContent = cn;
+    $('#qv-colours').querySelectorAll('.sw').forEach((s, i) => s.setAttribute('aria-pressed', String(i === qs.ci)));
+  }
+  function closeQuick() {
+    if (pv) pv.close();
+    qv.hidden = true;
+    qvScrim.hidden = true;
+    if (qvReturn && qvReturn.focus) qvReturn.focus();
+  }
+  // The quick-view 3D viewer starts on first use. undefined = not tried yet, null = unavailable.
+  let pv;
+  function getViewer() {
+    if (pv !== undefined) return pv;
+    const spinBtn = $('#qv-spin');
+    try {
+      pv = initProductViewer($('#qv-canvas'), $('#qv-media'), {
+        onSpin: (on) => spinBtn.setAttribute('aria-pressed', String(on)),
+        onTouch: () => $('#qv-hint').classList.add('gone'),
+      });
+    } catch (err) {
+      console.warn('3D quick view unavailable', err);
+      pv = null;
+    }
+    if (pv) {
+      spinBtn.addEventListener('click', () => pv.toggleSpin());
+      $('#qv-in').addEventListener('click', () => pv.zoomBy(1.2));
+      $('#qv-out').addEventListener('click', () => pv.zoomBy(1 / 1.2));
+      $('#qv-reset').addEventListener('click', () => pv.reset());
+      if (window.ResizeObserver) new ResizeObserver(() => pv.resize()).observe($('#qv-media'));
+    }
+    return pv;
+  }
+  $('#qv-colours').addEventListener('click', (e) => {
+    const s = e.target.closest('.sw');
+    if (s) { qs.ci = Number(s.dataset.ci); paintQuick(); }
+  });
+  $('#qv-sizes').addEventListener('click', (e) => {
+    const b = e.target.closest('.size');
+    if (!b) return;
+    qs.size = b.dataset.size;
+    $('#qv-sizes').querySelectorAll('.size').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    $('#qv-err').textContent = '';
+  });
+  $('#qv-add').addEventListener('click', () => {
+    const p = byId[qs.id];
+    if (p.sizes && !qs.size) {
+      $('#qv-err').textContent = 'Choose a size first.';
+      const f = qv.querySelector('.size');
+      if (f) f.focus();
+      return;
+    }
+    addToCart(qs.id, qs.ci, qs.size);
+    closeQuick();
+  });
+  $('#qv-3d').addEventListener('click', () => { const ci = qs.ci; closeQuick(); scrollToColour(ci); });
+  $('#qv-close').addEventListener('click', closeQuick);
+  qvScrim.addEventListener('click', closeQuick);
+
+  /* ---------- Phone menu and category links ---------- */
+  const menuBtn = $('#menu-btn'), mnav = $('#mnav');
+  function closeMenu() {
+    mnav.hidden = true;
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.textContent = 'Menu';
+  }
+  menuBtn.addEventListener('click', () => {
+    const open = mnav.hidden;
+    mnav.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.textContent = open ? 'Close' : 'Menu';
+  });
+  function goShop(instant) {
+    const top = $('#shop').getBoundingClientRect().top + window.scrollY - head.offsetHeight - 8;
+    window.scrollTo({ top, behavior: instant || reduce ? 'auto' : 'smooth' });
+  }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-filter]');
+    if (!a) return;
+    setFilter(a.dataset.filter);
+    closeMenu();
+    goShop(false);
+  });
+  window.addEventListener('hashchange', () => {
+    const f = location.hash.slice(1);
+    if (FILTER_IDS.includes(f)) { setFilter(f); goShop(false); }
+  });
+  function applyStartHash() {
+    const f = location.hash.slice(1);
+    if (!FILTER_IDS.includes(f)) return;
+    setFilter(f);
+    requestAnimationFrame(() => goShop(true));
+  }
+  cartList.addEventListener('click', (e) => {
+    const inc = e.target.closest('[data-inc]');
+    const dec = e.target.closest('[data-dec]');
+    if (inc) cart.set(inc.dataset.inc, cart.get(inc.dataset.inc) + 1);
+    if (dec) {
+      const q = cart.get(dec.dataset.dec) - 1;
+      if (q > 0) cart.set(dec.dataset.dec, q); else cart.delete(dec.dataset.dec);
+    }
+    if (inc || dec) renderCart();
+  });
+  function openCart() {
+    lastFocus = document.activeElement;
+    drawer.hidden = false;
+    scrim.hidden = false;
+    $('#cart-close').focus();
+  }
+  function closeCart() {
+    drawer.hidden = true;
+    scrim.hidden = true;
+    if (lastFocus) lastFocus.focus();
+  }
+  $('#cart-open').addEventListener('click', openCart);
+  $('#cart-close').addEventListener('click', closeCart);
+  scrim.addEventListener('click', closeCart);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!qv.hidden) closeQuick();
+    else if (!drawer.hidden) closeCart();
+    else if (!mnav.hidden) closeMenu();
+  });
+  $('#checkout').addEventListener('click', () => {
+    toast(cart.size ? 'Checkout is coming soon.' : 'Add a bag to your cart first.');
+  });
+  heroAdd.addEventListener('click', () => addToCart('top-handle', Math.max(0, active), null));
+
+  let toastTimer = 0;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  /* ---------- Sign-up ---------- */
+  $('#signup').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = $('#signup-email');
+    const msg = $('#signup-msg');
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+    msg.textContent = ok
+      ? "Thanks. We'll email you when the next colour drops."
+      : 'Enter an email address like name@example.com.';
+    if (ok) input.value = '';
+  });
+
+  /* ---------- Shared 3D toolkit (hero bag and quick-view viewer) ---------- */
+  const T3 = window.THREE;
+  const linC = (hex) => new T3.Color(hex).convertSRGBToLinear();
+
+  // Rounded polygon outline for extruded leather panels.
+  function roundedPoly(pts, radii) {
+    const s = new T3.Shape();
+    const n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const p = pts[i], prev = pts[(i - 1 + n) % n], next = pts[(i + 1) % n], r = radii[i];
+      const inx = p[0] - prev[0], iny = p[1] - prev[1], il = Math.hypot(inx, iny);
+      const ox = next[0] - p[0], oy = next[1] - p[1], ol = Math.hypot(ox, oy);
+      const ax = p[0] - (inx / il) * r, ay = p[1] - (iny / il) * r;
+      const bx = p[0] + (ox / ol) * r, by = p[1] + (oy / ol) * r;
+      if (i === 0) s.moveTo(ax, ay); else s.lineTo(ax, ay);
+      s.quadraticCurveTo(p[0], p[1], bx, by);
+    }
+    s.closePath();
+    return s;
+  }
+  // Grow (d > 0) or shrink (d < 0) a convex, counter-clockwise outline.
+  function offsetPoly(pts, d) {
+    const n = pts.length;
+    const nrm = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); return [dy / l, -dx / l]; };
+    return pts.map((p, i) => {
+      const n1 = nrm(pts[(i - 1 + n) % n], p), n2 = nrm(p, pts[(i + 1) % n]);
+      const k = d / (1 + n1[0] * n2[0] + n1[1] * n2[1]);
+      return [p[0] + (n1[0] + n2[0]) * k, p[1] + (n1[1] + n2[1]) * k];
+    });
+  }
+  // ExtrudeGeometry comes out faceted; average normals that share a position.
+  function smoothNormals(geo, crease) {
+    const g = geo.index ? geo.toNonIndexed() : geo;
+    g.computeVertexNormals();
+    const pos = g.attributes.position, nor = g.attributes.normal, n = pos.count;
+    const groups = new Map();
+    for (let i = 0; i < n; i++) {
+      const k = Math.round(pos.getX(i) * 1e4) + ',' + Math.round(pos.getY(i) * 1e4) + ',' + Math.round(pos.getZ(i) * 1e4);
+      let a = groups.get(k);
+      if (!a) { a = []; groups.set(k, a); }
+      a.push(i);
+    }
+    const out = new Float32Array(n * 3), lim = Math.cos(crease);
+    groups.forEach((idx) => {
+      for (const i of idx) {
+        const nx = nor.getX(i), ny = nor.getY(i), nz = nor.getZ(i);
+        let x = 0, y = 0, z = 0;
+        for (const j of idx) {
+          const mx = nor.getX(j), my = nor.getY(j), mz = nor.getZ(j);
+          if (nx * mx + ny * my + nz * mz >= lim) { x += mx; y += my; z += mz; }
+        }
+        const l = Math.hypot(x, y, z) || 1;
+        out[i * 3] = x / l; out[i * 3 + 1] = y / l; out[i * 3 + 2] = z / l;
+      }
+    });
+    g.setAttribute('normal', new T3.BufferAttribute(out, 3));
+    return g;
+  }
+  const extrude = (pts, radii, opts) =>
+    smoothNormals(new T3.ExtrudeGeometry(roundedPoly(pts, radii), Object.assign({ bevelEnabled: true }, opts)), Math.PI / 3);
+  const vec3s = (pts) => pts.map((p) => new T3.Vector3(p[0], p[1], p[2]));
+  const scaleU = (geo, k) => { const uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setX(i, uv.getX(i) * k); };
+  const wrapAngle = (a) => a - TAU * Math.round(a / TAU);
+  function tubeGeo(pts, radius, closed, segs, radial) {
+    return new T3.TubeGeometry(new T3.CatmullRomCurve3(vec3s(pts), !!closed, 'centripetal'), segs || 64, radius, radial || 12, !!closed);
+  }
+  // A tube that follows an outline: piping when solid, stitching when dashed.
+  function outlineTubeGeo(pts, radii, z, radius, dashLen) {
+    let ring = roundedPoly(pts, radii).getSpacedPoints(260);
+    const f = ring[0], l = ring[ring.length - 1];
+    if (Math.hypot(f.x - l.x, f.y - l.y) < 1e-4) ring = ring.slice(0, -1);
+    const curve = new T3.CatmullRomCurve3(ring.map((p) => new T3.Vector3(p.x, p.y, z)), true, 'centripetal');
+    const geo = new T3.TubeGeometry(curve, 420, radius, 8, true);
+    if (dashLen) scaleU(geo, Math.round(curve.getLength() / dashLen));
+    return geo;
+  }
+  // A flat strap swept along a path in the XY plane. widthAlongZ: the strap's
+  // width runs along z (a coiled belt); otherwise its broad face looks along z.
+  function ribbonGeo(points, width, thick, widthAlongZ) {
+    const curve = new T3.CatmullRomCurve3(vec3s(points), false, 'centripetal');
+    const N = Math.max(40, points.length * 10), len = curve.getLength();
+    const pos = [], uv = [], idx = [];
+    const Z = new T3.Vector3(0, 0, 1), c = new T3.Vector3(), tg = new T3.Vector3(), nr = new T3.Vector3();
+    for (let i = 0; i <= N; i++) {
+      const u = i / N;
+      curve.getPointAt(u, c);
+      curve.getTangentAt(u, tg);
+      nr.crossVectors(Z, tg).normalize();
+      const W = widthAlongZ ? Z : nr, K = widthAlongZ ? nr : Z;
+      [[1, 1], [-1, 1], [-1, -1], [1, -1]].forEach(([a, b]) => {
+        pos.push(c.x + W.x * width * 0.5 * a + K.x * thick * 0.5 * b,
+                 c.y + W.y * width * 0.5 * a + K.y * thick * 0.5 * b,
+                 c.z + W.z * width * 0.5 * a + K.z * thick * 0.5 * b);
+      });
+      for (let k = 0; k < 4; k++) uv.push(u * len * 3, k / 3);
+      if (i < N) {
+        for (let k = 0; k < 4; k++) {
+          const a = i * 4 + k, b = i * 4 + ((k + 1) % 4);
+          if (widthAlongZ) idx.push(a, a + 4, b, b, a + 4, b + 4);
+          else idx.push(a, b, a + 4, b, b + 4, a + 4);
+        }
+      }
+    }
+    const e = N * 4;
+    idx.push(0, 1, 2, 0, 2, 3, 0, 2, 1, 0, 3, 2, e, e + 1, e + 2, e, e + 2, e + 3, e, e + 2, e + 1, e, e + 3, e + 2);
+    const geo = new T3.BufferGeometry();
+    geo.setAttribute('position', new T3.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('uv', new T3.Float32BufferAttribute(uv, 2));
+    geo.setIndex(idx);
+    geo.computeVertexNormals();
+    return geo;
+  }
+  // A group with a put() helper for placing meshes.
+  function kit() {
+    const g = new T3.Group();
+    g.put = (geo, mat, x, y, z, rx, ry, rz) => {
+      const m = new T3.Mesh(geo, mat);
+      m.position.set(x || 0, y || 0, z || 0);
+      m.rotation.set(rx || 0, ry || 0, rz || 0);
+      g.add(m);
+      return m;
+    };
+    return g;
+  }
+
+  /* Canvas-drawn textures, so nothing has to be downloaded. */
+  function canvasTex(size, draw, rep) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    draw(c.getContext('2d'), size);
+    const t = new T3.CanvasTexture(c);
+    t.wrapS = t.wrapT = T3.RepeatWrapping;
+    if (rep) t.repeat.set(rep, rep);
+    return t;
+  }
+  // Pebbled leather grain, tiled as a bump map.
+  const grainTexture = () => canvasTex(256, (g, S) => {
+    g.fillStyle = '#808080';
+    g.fillRect(0, 0, S, S);
+    for (let k = 0; k < 2400; k++) {
+      const x = Math.random() * S, y = Math.random() * S, r = 2 + Math.random() * 5;
+      const v = (105 + Math.random() * 100) | 0;
+      for (let dx = -S; dx <= S; dx += S) {
+        for (let dy = -S; dy <= S; dy += S) {
+          const cx = x + dx, cy = y + dy;
+          if (cx < -r || cx > S + r || cy < -r || cy > S + r) continue;
+          const grd = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+          grd.addColorStop(0, `rgba(${v},${v},${v},0.9)`);
+          grd.addColorStop(1, `rgba(${v},${v},${v},0)`);
+          g.fillStyle = grd;
+          g.beginPath();
+          g.arc(cx, cy, r, 0, Math.PI * 2);
+          g.fill();
+        }
+      }
+    }
+  }, 2.2);
+  // Plain weave for linen and crepe.
+  const weaveTexture = () => canvasTex(128, (g, S) => {
+    g.fillStyle = '#808080';
+    g.fillRect(0, 0, S, S);
+    for (let i = 0; i < S; i += 4) {
+      g.fillStyle = 'rgba(255,255,255,.2)';
+      g.fillRect(i, 0, 2, S);
+      g.fillStyle = 'rgba(0,0,0,.16)';
+      g.fillRect(0, i, S, 2);
+    }
+  }, 6);
+  // Knit stitches (rows of little Vs).
+  const knitTexture = () => canvasTex(128, (g, S) => {
+    g.fillStyle = '#6E6E6E';
+    g.fillRect(0, 0, S, S);
+    g.strokeStyle = '#CFCFCF';
+    g.lineWidth = 3;
+    for (let x = 0; x < S; x += 16) {
+      for (let y = 0; y < S; y += 16) {
+        g.beginPath();
+        g.moveTo(x + 2, y + 2);
+        g.lineTo(x + 8, y + 14);
+        g.lineTo(x + 14, y + 2);
+        g.stroke();
+      }
+    }
+  }, 5);
+  // Scarf print: white ground with tonal border and medallion, tinted by the colour.
+  const silkTexture = () => canvasTex(512, (g, S) => {
+    const C = S / 2;
+    g.fillStyle = '#FFFFFF';
+    g.fillRect(0, 0, S, S);
+    g.strokeStyle = 'rgba(0,0,0,.3)';
+    g.lineWidth = 20;
+    g.strokeRect(30, 30, S - 60, S - 60);
+    g.lineWidth = 3;
+    g.strokeRect(66, 66, S - 132, S - 132);
+    g.fillStyle = 'rgba(0,0,0,.18)';
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      g.beginPath();
+      g.ellipse(C + Math.cos(a) * 84, C + Math.sin(a) * 84, 40, 14, a, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.fillStyle = 'rgba(0,0,0,.28)';
+    g.beginPath();
+    g.arc(C, C, 44, 0, Math.PI * 2);
+    g.fill();
+    g.lineWidth = 4;
+    g.beginPath();
+    g.arc(C, C, 156, 0, Math.PI * 2);
+    g.stroke();
+    g.fillStyle = 'rgba(0,0,0,.22)';
+    [[112, 112], [S - 112, 112], [112, S - 112], [S - 112, S - 112]].forEach(([x, y]) => {
+      g.beginPath();
+      g.arc(x, y, 24, 0, Math.PI * 2);
+      g.fill();
+    });
+    for (let i = 0; i < 28; i++) {
+      const t = 84 + ((S - 168) * i) / 27;
+      [[t, 48], [t, S - 48], [48, t], [S - 48, t]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 4, 0, Math.PI * 2); g.fill(); });
+    }
+  });
+  // Stitch dashes for an alphaMap (white = thread, black = gap).
+  const dashTexture = () => canvasTex(64, (g, S) => {
+    g.fillStyle = '#000000';
+    g.fillRect(0, 0, S, S);
+    g.fillStyle = '#FFFFFF';
+    g.fillRect(0, 0, S * 0.6, S);
+  });
+  function blobTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d'), grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grd.addColorStop(0, 'rgba(0,0,0,1)');
+    grd.addColorStop(0.5, 'rgba(0,0,0,.45)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 128, 128);
+    return new T3.CanvasTexture(c);
+  }
+  // Soft studio reflections, generated in code.
+  function studioEnv(renderer) {
+    const env = new T3.Scene();
+    env.add(new T3.Mesh(new T3.BoxGeometry(20, 20, 20), new T3.MeshBasicMaterial({ color: 0x3a3a3a, side: T3.BackSide })));
+    const softbox = (w, h, pos, rot, intensity) => {
+      const m = new T3.MeshBasicMaterial({ side: T3.DoubleSide });
+      m.color.setScalar(intensity);
+      const p = new T3.Mesh(new T3.PlaneGeometry(w, h), m);
+      p.position.set(pos[0], pos[1], pos[2]);
+      p.rotation.set(rot[0], rot[1], 0);
+      env.add(p);
+    };
+    softbox(12, 6, [0, 9, 0], [Math.PI / 2, 0], 4);
+    softbox(4, 10, [-9, 1, 2], [0, Math.PI / 2], 3);
+    softbox(4, 10, [9, 0, -2], [0, -Math.PI / 2], 1.6);
+    softbox(10, 4, [0, 0, 9], [0, 0], 1.3);
+    softbox(10, 4, [0, 0, -9], [0, 0], 1.1);
+    const pmrem = new T3.PMREMGenerator(renderer);
+    const tex = pmrem.fromScene(env, 0.04).texture;
+    pmrem.dispose();
+    return tex;
+  }
+  // Gold-foil "emmy" logo for the Top Handle flap.
+  function makeLogoMaterial(renderer) {
+    const c = document.createElement('canvas');
+    c.width = 512;
+    c.height = 160;
+    const tex = new T3.CanvasTexture(c);
+    tex.encoding = T3.sRGBEncoding;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const draw = () => {
+      const g = c.getContext('2d');
+      g.clearRect(0, 0, 512, 160);
+      const grad = g.createLinearGradient(0, 24, 0, 136);
+      grad.addColorStop(0, '#F6E2A6');
+      grad.addColorStop(0.55, '#D2A956');
+      grad.addColorStop(1, '#A8802F');
+      g.fillStyle = grad;
+      g.font = '800 132px "Bricolage Grotesque", "Arial Black", sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText('emmy', 256, 84);
+      tex.needsUpdate = true;
+    };
+    draw();
+    if (document.fonts && document.fonts.load) document.fonts.load('800 132px "Bricolage Grotesque"').then(draw).catch(() => {});
+    return new T3.MeshStandardMaterial({
+      map: tex, transparent: true, alphaTest: 0.35, metalness: 0.85, roughness: 0.3,
+      polygonOffset: true, polygonOffsetFactor: -2,
+    });
+  }
+
+  /* ---------- 3D models (1 unit ≈ 10 cm before the viewer scales them) ---------- */
+  // The Emmy Top Handle: 26 × 19 × 11 cm. M = { leather, stitch, gold, logo }.
+  function buildTopHandle(M) {
+    const g = kit();
+    const BODY = [[-1.2, 0], [1.2, 0], [1.0, 1.7], [-1.0, 1.7]], BODY_R = [0.34, 0.34, 0.2, 0.2];
+    const body = extrude(BODY, BODY_R, { depth: 0.78, bevelThickness: 0.17, bevelSize: 0.13, bevelSegments: 12, curveSegments: 32 });
+    body.translate(0, 0, -0.39);
+    g.put(body, M.leather);
+    // Welted piping around the front and back edges, sitting on the bevel.
+    const pipeOff = 0.13 * Math.SQRT1_2, pipeZ = 0.39 + 0.17 * Math.SQRT1_2;
+    const pipePts = offsetPoly(BODY, pipeOff), pipeR = BODY_R.map((r) => r + pipeOff);
+    g.put(outlineTubeGeo(pipePts, pipeR, pipeZ, 0.034), M.leather);
+    g.put(outlineTubeGeo(pipePts, pipeR, -pipeZ, 0.034), M.leather);
+    // Front flap with a stitched edge.
+    const FLAP = [[-1.11, 0.74], [1.11, 0.74], [0.985, 1.68], [-0.985, 1.68]], FLAP_R = [0.42, 0.42, 0.12, 0.12];
+    const flap = extrude(FLAP, FLAP_R, { depth: 0.02, bevelThickness: 0.03, bevelSize: 0.035, bevelSegments: 4, curveSegments: 24 });
+    flap.translate(0, 0, 0.585);
+    g.put(flap, M.leather);
+    g.put(outlineTubeGeo(offsetPoly(FLAP, -0.065), FLAP_R.map((r) => Math.max(0.04, r - 0.065)), 0.638, 0.009, 0.05), M.stitch);
+    // Back slip pocket with a stitched edge.
+    const POCKET = [[-0.95, 0.26], [0.95, 0.26], [0.89, 1.18], [-0.89, 1.18]], POCKET_R = [0.26, 0.26, 0.05, 0.05];
+    const pocket = extrude(POCKET, POCKET_R, { depth: 0.02, bevelThickness: 0.025, bevelSize: 0.03, bevelSegments: 4, curveSegments: 20 });
+    pocket.translate(0, 0, -0.605);
+    g.put(pocket, M.leather);
+    g.put(outlineTubeGeo(offsetPoly(POCKET, -0.055), POCKET_R.map((r) => Math.max(0.04, r - 0.055)), -0.633, 0.009, 0.05), M.stitch);
+    // Turn-lock clasp.
+    const plate = extrude([[-0.17, -0.1], [0.17, -0.1], [0.17, 0.1], [-0.17, 0.1]], [0.07, 0.07, 0.07, 0.07],
+      { depth: 0.02, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 3, curveSegments: 10 });
+    g.put(plate, M.gold, 0, 0.8, 0.65);
+    g.put(new T3.CylinderGeometry(0.04, 0.04, 0.2, 24), M.gold, 0, 0.8, 0.7, 0, 0, Math.PI / 2);
+    g.put(new T3.SphereGeometry(0.055, 24, 16), M.gold, 0, 0.8, 0.7);
+    if (M.logo) g.put(new T3.PlaneGeometry(0.64, 0.2), M.logo, 0, 1.3, 0.637).userData.noShadow = true;
+    // Top handle with brass ferrules.
+    g.put(tubeGeo([[-0.62, 1.76, 0], [-0.56, 2.32, 0], [0, 2.62, 0], [0.56, 2.32, 0], [0.62, 1.76, 0]], 0.075, false, 120, 24), M.leather);
+    g.put(new T3.CylinderGeometry(0.1, 0.115, 0.12, 32), M.gold, -0.62, 1.87, 0);
+    g.put(new T3.CylinderGeometry(0.1, 0.115, 0.12, 32), M.gold, 0.62, 1.87, 0);
+    // Side D-rings for the strap, and brass feet.
+    const ringGeo = new T3.TorusGeometry(0.085, 0.02, 12, 40);
+    g.put(ringGeo, M.gold, -1.17, 1.5, 0, 0, Math.PI / 2);
+    g.put(ringGeo, M.gold, 1.17, 1.5, 0, 0, Math.PI / 2);
+    const footGeo = new T3.CylinderGeometry(0.065, 0.075, 0.06, 24);
+    [[-0.85, 0.3], [0.85, 0.3], [-0.85, -0.3], [0.85, -0.3]].forEach((f) => g.put(footGeo, M.gold, f[0], -0.16, f[1]));
+    return g;
+  }
+
+  /* Shoe parts. Toe points along +x, heel at x = 0, about 25 cm long. */
+  function footprint() {
+    const half = [[0.06, 0.2], [0.25, 0.29], [0.6, 0.3], [1.0, 0.29], [1.5, 0.39], [1.9, 0.42], [2.2, 0.36], [2.42, 0.22]];
+    const pts = [[0, 0, 0]].concat(half.map(([x, w]) => [x, 0, w]), [[2.52, 0, 0]], half.slice().reverse().map(([x, w]) => [x, 0, -w]));
+    return new T3.CatmullRomCurve3(vec3s(pts), true, 'centripetal');
+  }
+  function uAtX(O, x) {
+    for (let u = 0; u <= 0.5; u += 0.002) if (O.getPointAt(u).x >= x) return u;
+    return 0.5;
+  }
+  const widthAt = (O, x) => Math.abs(O.getPointAt(uAtX(O, x)).z);
+  // Heel lift: full height H behind x = a, flat from x = b.
+  const liftFn = (H, a, b) => (x) => H * (1 - smooth(clamp((x - a) / (b - a), 0, 1)));
+  function soleGeo(O, thick, lift) {
+    const pts = O.getSpacedPoints(160).slice(0, -1).map((p) => new T3.Vector2(p.x, -p.z));
+    const geo = new T3.ExtrudeGeometry(new T3.Shape(pts), { depth: thick, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3, curveSegments: 4 });
+    geo.rotateX(-Math.PI / 2);
+    geo.translate(0, 0.02, 0);
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) p.setY(i, p.getY(i) + lift(p.getX(i)));
+    return smoothNormals(geo, Math.PI / 3);
+  }
+  // Side walls of the upper, rising height(x) above the footbed and leaning in.
+  function wallGeo(O, from, to, height, top, inset) {
+    const N = 100, pos = [], uv = [], idx = [], rim = [];
+    for (let i = 0; i <= N; i++) {
+      const u = from + ((to - from) * i) / N;
+      const p = O.getPointAt(((u % 1) + 1) % 1);
+      const y0 = top(p.x) - 0.015, h = height(p.x), zi = p.z * inset, xt = p.x + (p.x < 0.3 ? 0.03 : 0);
+      pos.push(p.x, y0, zi, xt, y0 + h, zi * 0.84);
+      rim.push([xt, y0 + h, zi * 0.84]);
+      uv.push((i / N) * 8, 0, (i / N) * 8, 1);
+      if (i < N) { const a = i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    }
+    const geo = new T3.BufferGeometry();
+    geo.setAttribute('position', new T3.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('uv', new T3.Float32BufferAttribute(uv, 2));
+    geo.setIndex(idx);
+    geo.computeVertexNormals();
+    return { geo, rim };
+  }
+  // Toe box: the front-top quarter of an ellipsoid that follows the footbed.
+  function vampGeo(x0, rx, ry, rz, top) {
+    const geo = new T3.SphereGeometry(1, 56, 24, Math.PI / 2, Math.PI, 0, Math.PI / 2);
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = x0 + p.getX(i) * rx;
+      p.setXYZ(i, x, top(x) - 0.015 + p.getY(i) * ry, p.getZ(i) * rz);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }
+  // Bound edge along the back of the toe box.
+  function archGeo(x0, ry, rz, top, r) {
+    const pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const s = -Math.PI / 2 + (Math.PI * i) / 24;
+      pts.push([x0, top(x0) - 0.015 + ry * Math.cos(s), rz * Math.sin(s)]);
+    }
+    return tubeGeo(pts, r, false, 64, 8);
+  }
+  function heelGeo(pts, h) {
+    const geo = extrude(pts, [0.08, 0.08, 0.08, 0.08], { depth: h, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2, curveSegments: 8 });
+    geo.rotateX(-Math.PI / 2);
+    return geo;
+  }
+  // Show shoes as a pair: the second one is a mirror image.
+  function pair(shoe) {
+    const g = new T3.Group(), twin = shoe.clone();
+    twin.scale.z = -1;
+    twin.position.set(0.35, 0, -1.0);
+    g.add(shoe, twin);
+    return g;
+  }
+
+  /* Garment parts, shown on an invisible form. Front faces +z. */
+  function profileFn(prof) {
+    const pts = new T3.SplineCurve(prof.map(([r, y]) => new T3.Vector2(r, y))).getPoints(80);
+    const at = (y) => {
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i];
+        if ((y - a.y) * (y - b.y) <= 0 && a.y !== b.y) return a.x + ((b.x - a.x) * (y - a.y)) / (b.y - a.y);
+      }
+      return pts[y < pts[0].y ? 0 : pts.length - 1].x;
+    };
+    return { pts, at };
+  }
+  // A lathe body with an oval cross-section, optional folds and a reshaped opening.
+  function garmentGeo(prof, o) {
+    const opt = Object.assign({ segs: 96, phiStart: Math.PI, phiLength: Math.PI * 2, zs: () => 0.72, fold: null, warp: null }, o);
+    const geo = new T3.LatheGeometry(profileFn(prof).pts, opt.segs, opt.phiStart, opt.phiLength);
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      let r = Math.hypot(x, z), phi = Math.atan2(x, z);
+      if (opt.warp) phi = opt.warp(phi, y);
+      if (opt.fold) r *= 1 + opt.fold(y, phi);
+      p.setXYZ(i, r * Math.sin(phi), y, r * Math.cos(phi) * opt.zs(y));
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }
+  // A point on the front of a garment body, a hair above the surface.
+  function onBody(R, zs, y, xf, lift) {
+    const r = R.at(y), x = xf * r;
+    return [x, y, Math.sqrt(Math.max(0, r * r - x * x)) * zs(y) + lift];
+  }
+
+  // Each builder returns the model, the materials that take the chosen colour, and its resting angle [yaw, pitch].
+  const BUILD = {
+    topHandle(M) {
+      const main = M.leather();
+      return { group: buildTopHandle({ leather: main, stitch: M.thread, gold: M.gold, logo: M.logo }), main, rest: [-0.45, 0.1] };
+    },
+    crossbody(M) {
+      const main = M.leather(), g = kit();
+      main.side = T3.DoubleSide;
+      const body = extrude([[-0.95, 0], [0.95, 0], [0.95, 1.25], [-0.95, 1.25]], [0.32, 0.32, 0.32, 0.32],
+        { depth: 0.36, bevelThickness: 0.1, bevelSize: 0.1, bevelSegments: 8, curveSegments: 24 });
+      body.translate(0, 0, -0.18);
+      g.put(body, main);
+      const FL = [[-0.99, 0.62], [0, 0.22], [0.99, 0.62], [0.99, 1.3], [-0.99, 1.3]], FR = [0.14, 0.16, 0.14, 0.24, 0.24];
+      const flap = extrude(FL, FR, { depth: 0.02, bevelThickness: 0.025, bevelSize: 0.03, bevelSegments: 4, curveSegments: 20 });
+      flap.translate(0, 0, 0.305);
+      g.put(flap, main);
+      g.put(outlineTubeGeo(offsetPoly(FL, -0.06), FR.map((r) => Math.max(0.04, r - 0.06)), 0.358, 0.008, 0.045), M.thread);
+      g.put(new T3.CylinderGeometry(0.075, 0.075, 0.04, 32), M.gold, 0, 0.42, 0.37, Math.PI / 2);
+      g.put(new T3.SphereGeometry(0.04, 20, 14), M.gold, 0, 0.42, 0.39);
+      g.put(ribbonGeo([[-1.06, 1.08, 0], [-1.16, 2.0, 0], [-0.85, 3.0, 0], [0, 3.38, 0], [0.85, 3.0, 0], [1.16, 2.0, 0], [1.06, 1.08, 0]], 0.13, 0.03, false), main);
+      const ring = new T3.TorusGeometry(0.07, 0.018, 10, 32);
+      g.put(ring, M.gold, -1.06, 1.04, 0, 0, Math.PI / 2);
+      g.put(ring, M.gold, 1.06, 1.04, 0, 0, Math.PI / 2);
+      return { group: g, main, rest: [-0.45, 0.08] };
+    },
+    tote(M) {
+      const main = M.leather(), g = kit();
+      main.side = T3.DoubleSide;
+      const body = extrude([[-1.1, 0], [1.1, 0], [1.4, 2.1], [-1.4, 2.1]], [0.2, 0.2, 0.06, 0.06],
+        { depth: 0.7, bevelThickness: 0.12, bevelSize: 0.08, bevelSegments: 8, curveSegments: 24 });
+      body.translate(0, 0, -0.35);
+      g.put(body, main);
+      g.put(new T3.ShapeGeometry(roundedPoly([[-1.3, -0.34], [1.3, -0.34], [1.3, 0.34], [-1.3, 0.34]], [0.12, 0.12, 0.12, 0.12]), 16), M.lining, 0, 2.183, 0, -Math.PI / 2);
+      const handle = (z) => ribbonGeo([[-0.6, 2.05, z], [-0.62, 2.6, z], [-0.35, 3.05, z], [0, 3.15, z], [0.35, 3.05, z], [0.62, 2.6, z], [0.6, 2.05, z]], 0.16, 0.035, false);
+      g.put(handle(0.4), main);
+      g.put(handle(-0.4), main);
+      const rivet = new T3.CylinderGeometry(0.05, 0.05, 0.03, 20);
+      [[-0.6, 0.48], [0.6, 0.48], [-0.6, -0.48], [0.6, -0.48]].forEach(([x, z]) => g.put(rivet, M.gold, x, 1.98, z, Math.PI / 2));
+      const PK = [[-0.7, 0.45], [0.7, 0.45], [0.7, 1.35], [-0.7, 1.35]], PR = [0.08, 0.08, 0.08, 0.08];
+      const pocket = extrude(PK, PR, { depth: 0.015, bevelThickness: 0.015, bevelSize: 0.02, bevelSegments: 3, curveSegments: 12 });
+      pocket.translate(0, 0, 0.485);
+      g.put(pocket, main);
+      g.put(outlineTubeGeo(offsetPoly(PK, -0.05), PR.map(() => 0.04), 0.518, 0.008, 0.045), M.thread);
+      return { group: g, main, rest: [-0.45, 0.14] };
+    },
+    mule(M) {
+      const main = M.leather(), s = kit(), O = footprint();
+      main.side = T3.DoubleSide;
+      const H = 0.55, thick = 0.07, lift = liftFn(H, 0.55, 1.6), top = (x) => thick + 0.04 + lift(x);
+      s.put(soleGeo(O, thick, lift), M.sole);
+      s.put(heelGeo([[0.1, -0.21], [0.62, -0.24], [0.62, 0.24], [0.1, 0.21]], H + 0.02), main);
+      s.put(vampGeo(1.25, 1.3, 0.46, 0.44, top), main);
+      s.put(archGeo(1.25, 0.46, 0.44, top, 0.03), main);
+      return { group: pair(s), main, rest: [-0.75, 0.15] };
+    },
+    flat(M) {
+      const main = M.leather(), s = kit(), O = footprint();
+      main.side = T3.DoubleSide;
+      const thick = 0.05, lift = liftFn(0.05, 0.3, 1.3), top = (x) => thick + 0.04 + lift(x);
+      s.put(soleGeo(O, thick, lift), M.sole);
+      const ua = uAtX(O, 1.45);
+      const wall = wallGeo(O, -ua, ua, (x) => 0.2 + 0.08 * (1 - smooth(clamp(x / 0.9, 0, 1))), top, 0.97);
+      s.put(wall.geo, main);
+      s.put(tubeGeo(wall.rim, 0.022, false, 160, 8), main);
+      s.put(vampGeo(1.35, 1.2, 0.3, 0.42, top), main);
+      s.put(archGeo(1.35, 0.3, 0.42, top, 0.024), main);
+      const by = top(1.35) + 0.29, loop = new T3.SphereGeometry(0.1, 20, 14);
+      s.put(loop, main, 1.38, by, 0.11).scale.set(0.55, 0.4, 1.2);
+      s.put(loop, main, 1.38, by, -0.11).scale.set(0.55, 0.4, 1.2);
+      s.put(new T3.SphereGeometry(0.045, 16, 12), main, 1.38, by + 0.01, 0);
+      return { group: pair(s), main, rest: [-0.75, 0.2] };
+    },
+    sneaker(M) {
+      const main = M.leather(), s = kit(), O = footprint();
+      main.side = T3.DoubleSide;
+      const thick = 0.24, lift = liftFn(0.06, 0.3, 1.5), top = (x) => thick + 0.04 + lift(x);
+      s.put(soleGeo(O, thick, lift), M.rubber);
+      const ua = uAtX(O, 1.45);
+      const hW = (x) => 0.5 - 0.13 * smooth(clamp((x - 0.2) / 1.2, 0, 1));
+      const wall = wallGeo(O, -ua, ua, hW, top, 0.97);
+      s.put(wall.geo, main);
+      s.put(tubeGeo(wall.rim, 0.04, false, 160, 10), main);
+      s.put(vampGeo(1.35, 1.2, 0.42, 0.43, top), main);
+      // Tongue and laces.
+      const tY = (x) => top(x) + 0.42 + (1.4 - x) * 0.42;
+      s.put(ribbonGeo([[1.42, tY(1.42) - 0.02, 0], [1.1, tY(1.1), 0], [0.78, tY(0.78) + 0.04, 0]], 0.36, 0.05, true), main);
+      [0.95, 1.12, 1.29].forEach((x) => {
+        const w = widthAt(O, x) * 0.97 * 0.84, y = top(x) + hW(x);
+        s.put(tubeGeo([[x, y, -w], [x, tY(x) + 0.05, -w * 0.4], [x, tY(x) + 0.06, 0], [x, tY(x) + 0.05, w * 0.4], [x, y, w]], 0.018, false, 40, 6), M.lace);
+      });
+      // Pull tab at the heel.
+      s.put(ribbonGeo([[0.04, top(0) + 0.38, 0], [-0.02, top(0) + 0.56, 0], [0.02, top(0) + 0.66, 0]], 0.16, 0.04, true), main);
+      return { group: pair(s), main, rest: [-0.75, 0.15] };
+    },
+    sandal(M) {
+      const main = M.leather(), s = kit(), O = footprint();
+      main.side = T3.DoubleSide;
+      const H = 0.45, thick = 0.07, lift = liftFn(H, 0.55, 1.6), top = (x) => thick + 0.04 + lift(x);
+      s.put(soleGeo(O, thick, lift), M.sole);
+      s.put(heelGeo([[0.12, -0.16], [0.5, -0.18], [0.5, 0.18], [0.12, 0.16]], H + 0.02), main);
+      // Two straps across the toes.
+      [1.85, 2.2].forEach((x) => {
+        const w = widthAt(O, x) * 0.96, y = top(x);
+        s.put(tubeGeo([[x - 0.06, y, -w], [x, y + 0.2, -w * 0.62], [x + 0.03, y + 0.27, 0], [x, y + 0.2, w * 0.62], [x - 0.06, y, w]], 0.045, false, 48, 10), main);
+      });
+      // Ankle strap with a brass buckle, held up by a heel strap and two side straps.
+      const hy = top(0.2), ay = hy + 0.78;
+      s.put(new T3.TorusGeometry(0.34, 0.04, 12, 64), main, 0.36, ay, 0, Math.PI / 2).scale.set(1, 0.85, 1);
+      s.put(tubeGeo([[0.04, hy - 0.02, 0], [-0.03, hy + 0.35, 0], [0.03, ay - 0.02, 0]], 0.045, false, 32, 10), main);
+      [-1, 1].forEach((sd) => s.put(tubeGeo([[0.62, top(0.62) - 0.01, sd * 0.29], [0.6, (top(0.62) + ay) / 2, sd * 0.31], [0.5, ay, sd * 0.26]], 0.04, false, 32, 10), main));
+      s.put(new T3.BoxGeometry(0.14, 0.1, 0.03), M.gold, 0.36, ay, 0.3);
+      return { group: pair(s), main, rest: [-0.75, 0.18] };
+    },
+    dress(M) {
+      const main = M.fabric(), g = kit();
+      const prof = [[1.12, 0], [1.0, 0.5], [0.84, 1.0], [0.66, 1.5], [0.5, 1.9], [0.42, 2.12], [0.46, 2.4], [0.52, 2.68], [0.5, 2.92], [0.42, 3.1], [0.26, 3.2]];
+      const R = profileFn(prof);
+      const zs = (y) => 0.86 - 0.16 * smooth(clamp((y - 1.4) / 0.8, 0, 1));
+      const fold = (y, phi) => 0.07 * Math.sin(phi * 9) * (1 - smooth(clamp(y / 2.0, 0, 1)));
+      g.put(garmentGeo(prof, { zs, fold }), main);
+      // Flutter sleeves, tie waist and the ends of the tie.
+      [-1, 1].forEach((sd) => g.put(new T3.CylinderGeometry(0.17, 0.26, 0.42, 32, 1, true), main, sd * 0.58, 2.88, 0, 0, 0, sd * 0.95));
+      g.put(new T3.TorusGeometry(0.435, 0.035, 12, 96), main, 0, 2.12, 0, Math.PI / 2).scale.set(1, zs(2.12), 1);
+      g.put(tubeGeo([[0.3, 2.1, 0.23], [0.36, 1.85, 0.42], [0.38, 1.5, 0.55]], 0.03, false, 32, 8), main);
+      g.put(tubeGeo([[0.36, 2.1, 0.19], [0.45, 1.88, 0.37], [0.5, 1.6, 0.49]], 0.03, false, 32, 8), main);
+      // The wrap: two edges crossing over the bodice.
+      const edge = (y0, x0, y1, x1) => {
+        const pts = [];
+        for (let i = 0; i <= 12; i++) { const t = i / 12; pts.push(onBody(R, zs, y0 + (y1 - y0) * t, x0 + (x1 - x0) * t, 0.012)); }
+        return tubeGeo(pts, 0.016, false, 48, 6);
+      };
+      g.put(edge(3.12, -0.55, 2.16, 0.82), main);
+      g.put(edge(3.12, 0.55, 2.55, -0.05), main);
+      return { group: g, main, rest: [0.35, 0.05] };
+    },
+    shirt(M) {
+      const main = M.fabric(), g = kit();
+      const prof = [[0.64, 0], [0.64, 0.6], [0.63, 1.2], [0.6, 1.62], [0.54, 1.86], [0.4, 2.02], [0.24, 2.08]];
+      g.put(garmentGeo(prof, { zs: () => 0.66, fold: (y, phi) => 0.012 * Math.sin(phi * 14) * (1 - y / 2.1) }), main);
+      g.put(new T3.CylinderGeometry(0.25, 0.27, 0.14, 48, 1, true), main, 0, 2.12, 0).scale.set(1, 1, 0.82);
+      [-1, 1].forEach((sd) => {
+        g.put(new T3.BoxGeometry(0.17, 0.2, 0.02), main, sd * 0.1, 2.0, 0.29, -0.6, 0, sd * -0.5);
+        g.put(new T3.CylinderGeometry(0.21, 0.16, 1.6, 32, 1, true), main, sd * 0.72, 1.04, 0, 0, 0, sd * 0.12);
+        g.put(new T3.SphereGeometry(0.212, 24, 16), main, sd * 0.624, 1.834, 0).scale.set(1, 0.62, 1);
+        g.put(new T3.CylinderGeometry(0.168, 0.168, 0.16, 32, 1, true), main, sd * 0.82, 0.2, 0, 0, 0, sd * 0.12);
+      });
+      // Button placket, buttons and a chest pocket.
+      g.put(new T3.BoxGeometry(0.11, 1.78, 0.014), main, 0, 0.98, 0.425);
+      for (let i = 0; i < 6; i++) g.put(new T3.CylinderGeometry(0.028, 0.028, 0.014, 16), M.pearl, 0, 0.3 + i * 0.28, 0.437, Math.PI / 2);
+      g.put(new T3.BoxGeometry(0.26, 0.3, 0.014), main, 0.27, 1.38, 0.385, 0, 0.42, 0);
+      return { group: g, main, rest: [0.35, 0.05] };
+    },
+    trousers(M) {
+      const main = M.fabric(), g = kit();
+      g.put(garmentGeo([[0.62, 2.22], [0.64, 2.55], [0.6, 2.86], [0.57, 2.98]], { zs: () => 0.74 }), main);
+      g.put(new T3.CylinderGeometry(0.585, 0.585, 0.16, 64, 1, true), main, 0, 3.05, 0).scale.set(1, 1, 0.75);
+      // Wide legs that meet at the hips and part towards the hem, with soft folds.
+      [-1, 1].forEach((sd) => {
+        const leg = new T3.CylinderGeometry(0.38, 0.4, 2.32, 48, 10, true), p = leg.attributes.position;
+        for (let i = 0; i < p.count; i++) {
+          const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+          const k = 1 + 0.035 * Math.sin(Math.atan2(x, z) * 6) * (0.5 - y / 2.32);
+          p.setXYZ(i, x * k, y, z * k * 1.15);
+        }
+        leg.computeVertexNormals();
+        g.put(leg, main, sd * 0.33, 1.16, 0, 0, 0, sd * 0.0863);
+      });
+      [-1.1, -0.4, 0.4, 1.1].forEach((a) => g.put(new T3.BoxGeometry(0.05, 0.2, 0.025), main, 0.6 * Math.sin(a), 3.05, 0.6 * Math.cos(a) * 0.75, 0, a, 0));
+      g.put(new T3.CylinderGeometry(0.035, 0.035, 0.02, 20), M.gold, 0, 3.05, 0.45, Math.PI / 2);
+      return { group: g, main, rest: [0.35, 0.05] };
+    },
+    cardigan(M) {
+      const main = M.knit(), g = kit(), gap = 0.3;
+      const prof = [[0.62, 0.12], [0.62, 0.5], [0.6, 0.85], [0.55, 1.12], [0.42, 1.3], [0.26, 1.38]];
+      const R = profileFn(prof);
+      // Open front that widens into a V towards the neck.
+      const warp = (phi, y) => {
+        const k = smooth(clamp((y - 0.55) / 0.8, 0, 1)) * 0.55, a = Math.abs(phi);
+        return a < 1.2 ? Math.sign(phi) * (a + k * (1 - a / 1.2)) : phi;
+      };
+      g.put(garmentGeo(prof, { phiStart: gap / 2, phiLength: Math.PI * 2 - gap, zs: () => 0.7, warp }), main);
+      g.put(new T3.CylinderGeometry(0.63, 0.63, 0.18, 96, 1, true, gap / 2, Math.PI * 2 - gap), main, 0, 0.07, 0).scale.set(1, 1, 0.71);
+      [0.3, 0.55, 0.8].forEach((y) => {
+        const phi = -warp(gap / 2 + 0.09, y), r = R.at(y) + 0.012;
+        g.put(new T3.CylinderGeometry(0.035, 0.035, 0.02, 20), M.gold, r * Math.sin(phi), y, r * Math.cos(phi) * 0.7, Math.PI / 2);
+      });
+      [-1, 1].forEach((sd) => {
+        g.put(new T3.CylinderGeometry(0.2, 0.15, 1.3, 32, 1, true), main, sd * 0.7, 0.54, 0, 0, 0, sd * 0.14);
+        g.put(new T3.SphereGeometry(0.202, 24, 16), main, sd * 0.609, 1.184, 0).scale.set(1, 0.62, 1);
+        g.put(new T3.CylinderGeometry(0.158, 0.158, 0.2, 32, 1, true), main, sd * 0.79, -0.16, 0, 0, 0, sd * 0.14);
+      });
+      return { group: g, main, rest: [0.4, 0.05] };
+    },
+    scarf(M) {
+      const main = M.silk(), hem = new T3.MeshPhysicalMaterial({ roughness: 0.45, clearcoat: 0.15, side: T3.DoubleSide }), g = kit();
+      const S = 2.6, h = S / 2;
+      const wave = (x, y) => 0.13 * Math.sin(2.1 * x + 0.6) * Math.cos(1.7 * y) + 0.06 * Math.sin(4.2 * x + 3.1 * y) + 0.04 * Math.cos(5.5 * y - 1.0);
+      const geo = new T3.PlaneGeometry(S, S, 72, 72), p = geo.attributes.position;
+      for (let i = 0; i < p.count; i++) p.setZ(i, wave(p.getX(i), p.getY(i)));
+      geo.computeVertexNormals();
+      g.put(geo, main, 0, 0, 0, -1.05);
+      // Hand-rolled hem along the edges.
+      const edge = [], corners = [[-h, -h], [h, -h], [h, h], [-h, h]];
+      for (let k = 0; k < 4; k++) {
+        const [ax, ay] = corners[k], [bx, by] = corners[(k + 1) % 4];
+        for (let i = 0; i < 30; i++) { const t = i / 30, x = ax + (bx - ax) * t, y = ay + (by - ay) * t; edge.push([x, y, wave(x, y)]); }
+      }
+      g.put(tubeGeo(edge, 0.02, true, 360, 6), hem, 0, 0, 0, -1.05);
+      return { group: g, main, tints: [main, hem], rest: [0.4, 0.3] };
+    },
+    hoops(M) {
+      const main = M.metal(), g = kit(), ring = new T3.TorusGeometry(0.85, 0.075, 28, 160), post = new T3.CylinderGeometry(0.022, 0.022, 0.34, 12);
+      [[-0.6, 0, 0.1, 0.55], [0.6, 0.18, -0.25, -0.35]].forEach(([x, y, z, a]) => {
+        g.put(ring, main, x, y, z, 0, a);
+        g.put(post, main, x, y + 0.86, z).rotation.set(Math.PI / 2, a, 0, 'YXZ');
+      });
+      return { group: g, main, rest: [0.3, 0.1] };
+    },
+    sunglasses(M) {
+      const main = M.acetate(), g = kit();
+      const RIM = [[-0.95, 0.18], [-0.72, 0.42], [0, 0.38], [0.68, 0.44], [1.06, 0.54], [0.92, 0.02], [0.56, -0.4], [0, -0.47], [-0.6, -0.38], [-0.96, -0.06]];
+      const outline = (k, C) => {
+        const s = new C();
+        s.moveTo(RIM[0][0] * k, RIM[0][1] * k);
+        s.splineThru(RIM.slice(1).concat([RIM[0]]).map(([x, y]) => new T3.Vector2(x * k, y * k)));
+        return s;
+      };
+      const outer = outline(1, T3.Shape);
+      outer.holes.push(outline(0.8, T3.Path));
+      const frame = smoothNormals(new T3.ExtrudeGeometry(outer, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.035, bevelSize: 0.03, bevelSegments: 3, curveSegments: 28 }), Math.PI / 3);
+      const lens = new T3.ShapeGeometry(outline(0.84, T3.Shape), 28);
+      [-1, 1].forEach((sd) => {
+        g.put(frame, main, sd * 1.06, 0, 0).scale.x = sd;
+        g.put(lens, M.lens, sd * 1.06, 0, 0.05).scale.x = sd;
+        g.put(new T3.BoxGeometry(0.07, 0.11, 2.1), main, sd * 2.06, 0.36, -1.02);
+        g.put(new T3.BoxGeometry(0.07, 0.1, 0.5), main, sd * 2.06, 0.23, -2.28, -0.55);
+        g.put(new T3.CylinderGeometry(0.03, 0.03, 0.16, 16), M.gold, sd * 2.04, 0.36, 0.02);
+      });
+      g.put(tubeGeo([[-0.22, 0.2, 0.06], [0, 0.31, 0.07], [0.22, 0.2, 0.06]], 0.05, false, 24, 10), main);
+      return { group: g, main, rest: [0.55, 0.12] };
+    },
+    belt(M) {
+      const main = M.leather(), g = kit(), pts = [], turns = 3.2, r0 = 0.3, step = 0.075;
+      // Rolled up: a spiral that runs out into the buckle end.
+      for (let i = 0; i <= 200; i++) {
+        const t = (i / 200) * turns * TAU, r = r0 + (step * t) / TAU;
+        pts.push([r * Math.cos(t), r * Math.sin(t), 0]);
+      }
+      const tEnd = turns * TAU, rEnd = r0 + step * turns;
+      const end = [rEnd * Math.cos(tEnd), rEnd * Math.sin(tEnd)], tan = [-Math.sin(tEnd), Math.cos(tEnd)], out = [Math.cos(tEnd), Math.sin(tEnd)];
+      for (let k = 1; k <= 6; k++) pts.push([end[0] + tan[0] * k * 0.25, end[1] + tan[1] * k * 0.25, 0]);
+      g.put(ribbonGeo(pts, 0.36, 0.035, true), main);
+      const tip = [end[0] + tan[0] * 1.5, end[1] + tan[1] * 1.5];
+      const frameShape = roundedPoly([[-0.1, -0.26], [0.1, -0.26], [0.1, 0.26], [-0.1, 0.26]], [0.06, 0.06, 0.06, 0.06]);
+      frameShape.holes.push(roundedPoly([[-0.05, -0.2], [0.05, -0.2], [0.05, 0.2], [-0.05, 0.2]], [0.03, 0.03, 0.03, 0.03]));
+      const buckle = g.put(smoothNormals(new T3.ExtrudeGeometry(frameShape, { depth: 0.04, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 3, curveSegments: 12 }), Math.PI / 3), M.gold, tip[0], tip[1], 0);
+      buckle.up.set(0, 0, 1);
+      buckle.lookAt(tip[0] + tan[0], tip[1] + tan[1], 0);
+      g.put(new T3.CylinderGeometry(0.014, 0.014, 0.5, 10), M.gold, tip[0], tip[1], 0, Math.PI / 2);
+      // Punched holes along the tail.
+      [0.4, 0.6, 0.8].forEach((k) => {
+        const d = g.put(new T3.CircleGeometry(0.025, 16), M.lining, end[0] + tan[0] * k + out[0] * 0.019, end[1] + tan[1] * k + out[1] * 0.019, 0);
+        d.lookAt(d.position.x + out[0], d.position.y + out[1], 0);
+      });
+      return { group: g, main, rest: [0.5, 0.25] };
+    },
+  };
+
+  /* ---------- Quick-view 3D viewer ---------- */
+  function initProductViewer(canvas, media, hooks) {
+    const T = window.THREE;
+    if (!T) return null;
+    let renderer;
+    try {
+      renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    } catch (err) { return null; }
+    if (!renderer.getContext()) return null;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputEncoding = T.sRGBEncoding;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.95;
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
+
+    const scene = new T.Scene();
+    scene.environment = studioEnv(renderer);
+    const camera = new T.PerspectiveCamera(30, 1, 0.05, 100);
+    const key = new T.DirectionalLight(0xffffff, 0.85);
+    key.position.set(-1.5, 8, 3);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    Object.assign(key.shadow.camera, { left: -2.4, right: 2.4, top: 2.4, bottom: -2.4, near: 1, far: 20 });
+    key.shadow.camera.updateProjectionMatrix();
+    key.shadow.bias = -0.0004;
+    key.shadow.normalBias = 0.02;
+    scene.add(key, key.target);
+    const fill = new T.DirectionalLight(0xffffff, 0.5);
+    fill.position.set(-3, 3, 8);
+    scene.add(fill);
+    const rim = new T.DirectionalLight(0xffffff, 0.5);
+    rim.position.set(5, 2, -5);
+    scene.add(rim);
+
+    const floor = new T.Mesh(new T.PlaneGeometry(12, 12), new T.ShadowMaterial({ opacity: 0.16 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+    const blob = new T.Mesh(new T.PlaneGeometry(3, 3), new T.MeshBasicMaterial({ map: blobTexture(), color: 0x000000, transparent: true, opacity: 0.18, depthWrite: false }));
+    blob.rotation.x = -Math.PI / 2;
+    scene.add(blob);
+    const turn = new T.Group();
+    scene.add(turn);
+
+    const grain = grainTexture(), weave = weaveTexture(), knitT = knitTexture(), dash = dashTexture();
+    const M = {
+      leather: () => new T.MeshPhysicalMaterial({ roughness: 0.5, clearcoat: 0.3, clearcoatRoughness: 0.45, bumpMap: grain, bumpScale: 0.018 }),
+      fabric: () => new T.MeshStandardMaterial({ roughness: 0.92, bumpMap: weave, bumpScale: 0.006, side: T.DoubleSide }),
+      knit: () => new T.MeshStandardMaterial({ roughness: 1, bumpMap: knitT, bumpScale: 0.025, side: T.DoubleSide }),
+      silk: () => new T.MeshPhysicalMaterial({ roughness: 0.45, clearcoat: 0.15, clearcoatRoughness: 0.4, map: silkTexture(), side: T.DoubleSide }),
+      metal: () => new T.MeshStandardMaterial({ metalness: 1, roughness: 0.16 }),
+      acetate: () => new T.MeshPhysicalMaterial({ roughness: 0.14, clearcoat: 1, clearcoatRoughness: 0.05 }),
+      gold: new T.MeshStandardMaterial({ color: linC('#D8B46A'), metalness: 1, roughness: 0.26 }),
+      sole: new T.MeshStandardMaterial({ color: linC('#E6DACB'), roughness: 0.85 }),
+      rubber: new T.MeshStandardMaterial({ color: linC('#F4F0E8'), roughness: 0.7 }),
+      lining: new T.MeshStandardMaterial({ color: linC('#2A2124'), roughness: 0.95, side: T.DoubleSide }),
+      lens: new T.MeshPhysicalMaterial({ color: linC('#2A2230'), roughness: 0.05, metalness: 0.4, transparent: true, opacity: 0.88, side: T.DoubleSide }),
+      thread: new T.MeshStandardMaterial({ color: linC('#EFE4CF'), roughness: 0.9, alphaMap: dash, alphaTest: 0.5 }),
+      lace: new T.MeshStandardMaterial({ color: linC('#FBF8F2'), roughness: 0.8 }),
+      pearl: new T.MeshPhysicalMaterial({ color: linC('#F4EEE4'), roughness: 0.25, clearcoat: 1 }),
+      logo: makeLogoMaterial(renderer),
+    };
+
+    // Build each product once, scaled to the same size and centred on the turntable.
+    const cache = {};
+    function model(p) {
+      if (cache[p.id]) return cache[p.id];
+      const built = BUILD[p.art](M);
+      const g = built.group, holder = new T.Group();
+      holder.add(g);
+      g.updateMatrixWorld(true);
+      const box = new T.Box3().setFromObject(g), sphere = box.getBoundingSphere(new T.Sphere());
+      const s = 1.35 / sphere.radius;
+      g.scale.multiplyScalar(s);
+      g.position.copy(sphere.center).multiplyScalar(-s);
+      g.traverse((m) => {
+        if (!m.isMesh) return;
+        m.castShadow = !m.userData.noShadow;
+        m.receiveShadow = true;
+      });
+      cache[p.id] = { holder, tints: built.tints || [built.main], rest: built.rest, floor: (box.min.y - sphere.center.y) * s };
+      return cache[p.id];
+    }
+
+    const view = { yaw: 0, pitch: 0, vy: 0, vp: 0, zoom: 1, zoomT: 1, spin: true, goal: null, dragging: false };
+    const PITCH_MIN = -0.6, PITCH_MAX = 0.9, ZOOM_MIN = 0.7, ZOOM_MAX = 2.2;
+    const tint = new T.Color();
+    let cur = null, raf = 0, last = 0, W = 1, H = 1, baseDist = 6;
+    const setSpin = (on) => { view.spin = on; if (hooks && hooks.onSpin) hooks.onSpin(on); };
+    const touched = () => { if (hooks && hooks.onTouch) hooks.onTouch(); };
+
+    const pointers = new Map();
+    let pinch = null, lastMove = 0, moved = 0;
+    canvas.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 1) {
+        view.dragging = true;
+        view.goal = null;
+        view.vy = view.vp = 0;
+        moved = 0;
+        lastMove = performance.now();
+        canvas.classList.add('dragging');
+      } else if (pointers.size === 2) {
+        const [a, b] = Array.from(pointers.values());
+        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: view.zoomT };
+      }
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      const pt = pointers.get(e.pointerId);
+      if (!pt) return;
+      const dx = e.clientX - pt.x, dy = e.clientY - pt.y;
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      if (pointers.size >= 2 && pinch) {
+        const [a, b] = Array.from(pointers.values());
+        view.zoomT = clamp((pinch.z * Math.hypot(a.x - b.x, a.y - b.y)) / pinch.d, ZOOM_MIN, ZOOM_MAX);
+        touched();
+        return;
+      }
+      if (!view.dragging) return;
+      const now = performance.now(), mdt = Math.max(0.008, (now - lastMove) / 1000);
+      lastMove = now;
+      const dyaw = dx * 0.009, dpitch = e.pointerType === 'touch' ? 0 : dy * 0.006;
+      view.yaw += dyaw;
+      view.pitch = clamp(view.pitch + dpitch, PITCH_MIN, PITCH_MAX);
+      view.vy = view.vy * 0.5 + (dyaw / mdt) * 0.5;
+      view.vp = view.vp * 0.5 + (dpitch / mdt) * 0.5;
+      moved += Math.abs(dx) + Math.abs(dy);
+      if (moved > 6) { if (view.spin) setSpin(false); touched(); }
+    });
+    const endPointer = (e) => {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) pinch = null;
+      if (pointers.size === 0) {
+        view.dragging = false;
+        canvas.classList.remove('dragging');
+        if (e.type === 'pointercancel' || performance.now() - lastMove > 90) view.vy = view.vp = 0;
+        view.vy = clamp(view.vy, -9, 9);
+        view.vp = clamp(view.vp, -4, 4);
+      }
+    };
+    canvas.addEventListener('pointerup', endPointer);
+    canvas.addEventListener('pointercancel', endPointer);
+    canvas.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      view.zoomT = clamp(view.zoomT * Math.exp(-e.deltaY * 0.01), ZOOM_MIN, ZOOM_MAX);
+      touched();
+    }, { passive: false });
+
+    function resize() {
+      W = Math.max(1, media.clientWidth);
+      H = Math.max(1, media.clientHeight);
+      renderer.setSize(W, H, false);
+      camera.aspect = W / H;
+      const v = T.MathUtils.degToRad(camera.fov) / 2, hz = Math.atan(Math.tan(v) * camera.aspect);
+      baseDist = (1.35 / Math.sin(Math.min(v, hz))) * 1.04;
+    }
+    function frame(now) {
+      const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+      last = now;
+      if (!view.dragging) {
+        if (view.goal) {
+          const k = 1 - Math.exp(-dt * 5);
+          view.yaw += (view.goal.yaw - view.yaw) * k;
+          view.pitch += (view.goal.pitch - view.pitch) * k;
+          if (Math.abs(view.goal.yaw - view.yaw) < 0.002 && Math.abs(view.goal.pitch - view.pitch) < 0.002) view.goal = null;
+        } else {
+          view.yaw += view.vy * dt;
+          view.pitch = clamp(view.pitch + view.vp * dt, PITCH_MIN, PITCH_MAX);
+          const decay = Math.exp(-dt * 3);
+          view.vy *= decay;
+          view.vp *= decay;
+          if (view.spin) view.yaw += dt * 0.55;
+        }
+      }
+      view.zoom += (view.zoomT - view.zoom) * (1 - Math.exp(-dt * 6));
+      turn.rotation.set(view.pitch, view.yaw, 0);
+      turn.position.y = reduce ? 0 : Math.sin(now / 1000 * 1.2) * 0.03;
+      cur.tints.forEach((m) => m.color.lerp(tint, 1 - Math.exp(-dt * 8)));
+      const d = baseDist / view.zoom;
+      camera.position.set(0, d * 0.18, d);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(frame);
+    }
+
+    return {
+      open(p, hex) {
+        const next = model(p);
+        if (cur) turn.remove(cur.holder);
+        cur = next;
+        turn.add(cur.holder);
+        floor.position.y = cur.floor - 0.02;
+        blob.position.y = cur.floor - 0.015;
+        tint.copy(linC(hex));
+        cur.tints.forEach((m) => m.color.copy(tint));
+        Object.assign(view, { yaw: cur.rest[0], pitch: cur.rest[1], vy: 0, vp: 0, zoom: 1, zoomT: 1, goal: null });
+        setSpin(!reduce);
+        resize();
+        cancelAnimationFrame(raf);
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      },
+      setColour(hex) { tint.copy(linC(hex)); },
+      close() { cancelAnimationFrame(raf); raf = 0; },
+      resize() { if (raf) resize(); },
+      toggleSpin() { view.goal = null; setSpin(!view.spin); touched(); return view.spin; },
+      zoomBy(f) { view.zoomT = clamp(view.zoomT * f, ZOOM_MIN, ZOOM_MAX); touched(); },
+      reset() {
+        setSpin(false);
+        view.vy = view.vp = 0;
+        view.zoomT = 1;
+        if (cur) view.goal = { yaw: view.yaw + wrapAngle(cur.rest[0] - view.yaw), pitch: cur.rest[1] };
+      },
+    };
+  }
+
+  /* ---------- 3D bag ---------- */
+  function initThree(canvas) {
+    const T = window.THREE;
+    if (!T) return null;
+    let renderer;
+    try {
+      renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    } catch (err) { return null; }
+    if (!renderer.getContext()) return null;
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputEncoding = T.sRGBEncoding;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.9;
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
+
+    const scene = new T.Scene();
+    const camera = new T.PerspectiveCamera(26, 1, 0.1, 100);
+
+    scene.environment = studioEnv(renderer);
+
+    // Top light casts the real shadow; a front fill keeps the face bright.
+    const key = new T.DirectionalLight(0xffffff, 0.9);
+    key.position.set(-1.6, 9, 2.4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    Object.assign(key.shadow.camera, { left: -3.4, right: 3.4, top: 3.4, bottom: -3.4, near: 1, far: 24 });
+    key.shadow.camera.updateProjectionMatrix();
+    key.shadow.bias = -0.0004;
+    key.shadow.normalBias = 0.02;
+    scene.add(key, key.target);
+    const fill = new T.DirectionalLight(0xffffff, 0.5);
+    fill.position.set(-3, 3, 8);
+    scene.add(fill);
+    const rim = new T.DirectionalLight(0xffffff, 0.55);
+    rim.position.set(5, 2, -5);
+    scene.add(rim);
+
+    const lin = (hex) => new T.Color(hex).convertSRGBToLinear();
+    const bagLin = COLOURS.map((c) => lin(c.bag));
+
+    // The repaint: two colours and a split line, driven by scroll.
+    const uniforms = {
+      uColorA: { value: bagLin[0].clone() },
+      uColorB: { value: bagLin[1].clone() },
+      uSplit: { value: -1.2 },
+      uHalfW: { value: 1.33 },
+      uGroupInv: { value: new T.Matrix4() },
+    };
+    const SEAM_GLOW = [
+      '#include <emissivemap_fragment>',
+      'float seamD = abs(xn - uSplit);',
+      'float seamGlow = clamp(1.0 - seamD / 0.02, 0.0, 1.0) * 0.6 + exp(-pow(seamD / 0.07, 2.0)) * 0.16;',
+      'totalEmissiveRadiance += vec3(seamGlow);',
+    ].join('\n');
+    function seamify(mat, cacheKey, colourExpr, before) {
+      mat.customProgramCacheKey = () => cacheKey;
+      mat.onBeforeCompile = (shader) => {
+        Object.assign(shader.uniforms, uniforms);
+        shader.vertexShader = 'uniform mat4 uGroupInv;\nvarying vec3 vBagPos;\n' +
+          shader.vertexShader.replace('#include <begin_vertex>',
+            '#include <begin_vertex>\n  vBagPos = (uGroupInv * modelMatrix * vec4(transformed, 1.0)).xyz;');
+        shader.fragmentShader = 'uniform vec3 uColorA;\nuniform vec3 uColorB;\nuniform float uSplit;\nuniform float uHalfW;\nvarying vec3 vBagPos;\n' +
+          shader.fragmentShader
+            .replace('vec4 diffuseColor = vec4( diffuse, opacity );', [
+              'float xn = vBagPos.x / uHalfW;',
+              'float seamMix = smoothstep(uSplit - 0.04, uSplit + 0.04, xn);',
+              'vec3 leatherC = mix(uColorB, uColorA, seamMix);',
+              before || '',
+              'vec4 diffuseColor = vec4( (' + (colourExpr || 'leatherC') + ') * diffuse, opacity );',
+            ].join('\n'))
+            .replace('#include <emissivemap_fragment>', SEAM_GLOW);
+      };
+    }
+
+    const leather = new T.MeshPhysicalMaterial({
+      color: 0xffffff, roughness: 0.52, metalness: 0,
+      clearcoat: 0.3, clearcoatRoughness: 0.45,
+      bumpMap: grainTexture(), bumpScale: 0.018,
+    });
+    seamify(leather, 'emmy-leather');
+
+    // Stitching: a cream thread tinted by the leather, cut into dashes along the tube.
+    const white = new T.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1, T.RGBAFormat);
+    white.needsUpdate = true;
+    const stitch = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85, metalness: 0, map: white });
+    seamify(stitch, 'emmy-stitch', 'mix(leatherC, vec3(0.93, 0.88, 0.78), 0.55)', 'if (fract(vUv.x) > 0.58) discard;');
+
+    const gold = new T.MeshStandardMaterial({ color: lin('#D8B46A'), metalness: 1, roughness: 0.26 });
+
+    // The bag itself is built by the shared buildTopHandle().
+    const rig = new T.Group();
+    const bag = buildTopHandle({ leather, stitch, gold, logo: makeLogoMaterial(renderer) });
+    rig.add(bag);
+    scene.add(rig);
+    bag.traverse((m) => {
+      if (!m.isMesh) return;
+      m.castShadow = !m.userData.noShadow;
+      m.receiveShadow = true;
+    });
+
+    // Centre the bag on its own origin.
+    const box = new T.Box3().setFromObject(bag);
+    const centre = box.getCenter(new T.Vector3());
+    bag.children.forEach((m) => m.position.sub(centre));
+    const floorY = box.min.y - centre.y - 0.005;
+
+    // Real shadow on an invisible floor, plus a soft contact blob.
+    const floor = new T.Mesh(new T.PlaneGeometry(14, 14), new T.ShadowMaterial({ opacity: 0.17 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = floorY;
+    floor.receiveShadow = true;
+    rig.add(floor);
+    const sc = document.createElement('canvas');
+    sc.width = sc.height = 128;
+    const sg = sc.getContext('2d');
+    const grd = sg.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grd.addColorStop(0, 'rgba(0,0,0,1)');
+    grd.addColorStop(0.5, 'rgba(0,0,0,.45)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    sg.fillStyle = grd;
+    sg.fillRect(0, 0, 128, 128);
+    const blob = new T.Mesh(
+      new T.PlaneGeometry(3.4, 2.2),
+      new T.MeshBasicMaterial({ map: new T.CanvasTexture(sc), color: 0x000000, transparent: true, opacity: 0.2, depthWrite: false })
+    );
+    blob.rotation.x = -Math.PI / 2;
+    blob.position.y = floorY + 0.003;
+    rig.add(blob);
+
+    // Floating glossy beads in the current colour.
+    const pearlMat = new T.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.18, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08 });
+    const pearlTarget = new T.Color();
+    const pearls = [
+      [-2.35, 1.05, -0.6, 0.2], [2.4, 0.75, -0.4, 0.16], [-1.95, -0.95, 0.7, 0.12],
+      [2.05, -1.05, 0.8, 0.22], [-2.9, -0.1, -1.4, 0.1], [1.65, 1.75, -1.0, 0.09], [0.35, -1.95, 1.3, 0.08],
+    ].map((d, i) => {
+      const m = new T.Mesh(new T.SphereGeometry(d[3], 40, 28), pearlMat);
+      m.position.set(d[0], d[1], d[2]);
+      m.castShadow = true;
+      m.userData = { y: d[1], phase: i * 1.7, speed: 0.6 + (i % 3) * 0.22 };
+      rig.add(m);
+      return m;
+    });
+    function setPearl(k) {
+      pearlTarget.copy(bagLin[k]).lerp(new T.Color(1, 1, 1), k === N - 1 ? 0.04 : 0.16);
+    }
+    setPearl(0);
+    pearlMat.color.copy(pearlTarget);
+
+    /* ----- Detail points ----- */
+    const hsLayer = $('#hotspots');
+    let showDots = true;
+    const spots = HOTSPOTS.map((d) => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'hs off';
+      el.tabIndex = -1;
+      el.innerHTML = `<span class="hs-card"><strong>${d.title}</strong><span>${d.text}</span></span>`;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const was = el.classList.contains('open');
+        closeSpots();
+        if (!was) el.classList.add('open');
+      });
+      hsLayer.appendChild(el);
+      return {
+        el,
+        pos: new T.Vector3(d.pos[0], d.pos[1], d.pos[2]).sub(centre),
+        n: new T.Vector3(d.n[0], d.n[1], d.n[2]).normalize(),
+        min: d.min,
+        shown: false,
+        cw: 200,
+      };
+    });
+    function closeSpots() { spots.forEach((s) => s.el.classList.remove('open')); }
+
+    /* ----- Turning, spinning and zooming ----- */
+    const view = { yaw: -0.5, pitch: 0.06, vy: 0, vp: 0, zoom: 1, zoomT: 1, spin: false, goal: null, touched: false, dragging: false };
+    const PITCH_MIN = -0.5, PITCH_MAX = 0.7, ZOOM_MIN = 0.75, ZOOM_MAX = 1.9;
+    const pointers = new Map();
+    let pinch = null, lastMove = 0, moved = 0;
+    const wrap = (a) => a - TAU * Math.round(a / TAU);
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 1) {
+        view.dragging = true;
+        view.goal = null;
+        view.vy = 0;
+        view.vp = 0;
+        moved = 0;
+        lastMove = performance.now();
+        canvas.classList.add('dragging');
+      } else if (pointers.size === 2) {
+        const [a, b] = Array.from(pointers.values());
+        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: view.zoomT };
+      }
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      const pt = pointers.get(e.pointerId);
+      if (!pt) return;
+      const dx = e.clientX - pt.x, dy = e.clientY - pt.y;
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      if (pointers.size >= 2 && pinch) {
+        const [a, b] = Array.from(pointers.values());
+        view.zoomT = clamp((pinch.z * Math.hypot(a.x - b.x, a.y - b.y)) / pinch.d, ZOOM_MIN, ZOOM_MAX);
+        markTouched();
+        return;
+      }
+      if (!view.dragging) return;
+      const now = performance.now();
+      const mdt = Math.max(0.008, (now - lastMove) / 1000);
+      lastMove = now;
+      const dyaw = dx * 0.0085;
+      const dpitch = e.pointerType === 'touch' ? 0 : dy * 0.006;
+      view.yaw += dyaw;
+      view.pitch = clamp(view.pitch + dpitch, PITCH_MIN, PITCH_MAX);
+      view.vy = view.vy * 0.5 + (dyaw / mdt) * 0.5;
+      view.vp = view.vp * 0.5 + (dpitch / mdt) * 0.5;
+      moved += Math.abs(dx) + Math.abs(dy);
+      if (moved > 6) markTouched();
+    });
+    const endPointer = (e) => {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) pinch = null;
+      if (pointers.size === 0) {
+        view.dragging = false;
+        canvas.classList.remove('dragging');
+        if (e.type === 'pointercancel' || performance.now() - lastMove > 90) { view.vy = 0; view.vp = 0; }
+        view.vy = clamp(view.vy, -9, 9);
+        view.vp = clamp(view.vp, -4, 4);
+        if (moved < 6) closeSpots();
+      }
+    };
+    canvas.addEventListener('pointerup', endPointer);
+    canvas.addEventListener('pointercancel', endPointer);
+    // Pinch on a trackpad (or Ctrl + scroll) zooms; plain scrolling still moves the page.
+    canvas.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      view.zoomT = clamp(view.zoomT * Math.exp(-e.deltaY * 0.01), ZOOM_MIN, ZOOM_MAX);
+      markTouched();
+    }, { passive: false });
+
+    function markTouched() {
+      if (view.touched) return;
+      view.touched = true;
+      view.yaw += Math.sin(performance.now() / 1000 * 0.5) * 0.1 * (reduce ? 0 : 1);
+    }
+    const controls = {
+      toggleSpin() { view.spin = !view.spin; view.goal = null; markTouched(); return view.spin; },
+      zoomBy(f) { view.zoomT = clamp(view.zoomT * f, ZOOM_MIN, ZOOM_MAX); markTouched(); },
+      reset() {
+        markTouched();
+        view.spin = false;
+        view.vy = view.vp = 0;
+        view.zoomT = 1;
+        view.goal = { yaw: view.yaw + wrap(-0.5 - view.yaw), pitch: 0.06 };
+      },
+      setDots(on) { showDots = on; if (!on) closeSpots(); },
+    };
+
+    let baseDist = 12, W = 1, H = 1;
+    function resize() {
+      W = Math.max(1, stage.clientWidth);
+      H = Math.max(1, stage.clientHeight);
+      renderer.setSize(W, H, false);
+      camera.aspect = W / H;
+      const narrow = W < 640;
+      const t = Math.tan(T.MathUtils.degToRad(camera.fov / 2));
+      const visH = Math.max(3.1 / (narrow ? 0.46 : 0.58), (2.95 / (narrow ? 0.8 : 0.46)) / camera.aspect);
+      baseDist = visH / (2 * t);
+      rig.position.y = narrow ? visH * 0.1 : visH * 0.01;
+    }
+
+    const v3 = new T.Vector3(), n3 = new T.Vector3(), toCam = new T.Vector3();
+    let lastReadout = '';
+    function angleLabel(rad) {
+      const deg = Math.round((((rad % TAU) + TAU) % TAU) * 180 / Math.PI) % 360;
+      const off = Math.min(deg, 360 - deg);
+      const name = off <= 30 ? 'Front' : off >= 150 ? 'Back' : (off >= 60 && off <= 120) ? 'Side' : 'Three-quarter';
+      return `${name} · ${deg}°`;
+    }
+
+    function update(time, dt, seg, split) {
+      uniforms.uColorA.value.copy(bagLin[seg]);
+      uniforms.uColorB.value.copy(bagLin[seg + 1]);
+      uniforms.uSplit.value = split;
+
+      if (!view.dragging) {
+        if (view.goal) {
+          const k = 1 - Math.exp(-dt * 5);
+          view.yaw += (view.goal.yaw - view.yaw) * k;
+          view.pitch += (view.goal.pitch - view.pitch) * k;
+          if (Math.abs(view.goal.yaw - view.yaw) < 0.002 && Math.abs(view.goal.pitch - view.pitch) < 0.002) view.goal = null;
+        } else {
+          view.yaw += view.vy * dt;
+          view.pitch = clamp(view.pitch + view.vp * dt, PITCH_MIN, PITCH_MAX);
+          const decay = Math.exp(-dt * 3);
+          view.vy *= decay;
+          view.vp *= decay;
+          if (view.spin) view.yaw += dt * 0.9;
+        }
+      }
+      view.zoom += (view.zoomT - view.zoom) * (1 - Math.exp(-dt * 6));
+
+      const idle = reduce ? 0 : 1;
+      const sway = view.touched ? 0 : Math.sin(time * 0.5) * 0.1 * idle;
+      bag.rotation.set(view.pitch, view.yaw + sway, Math.sin(time * 0.7) * 0.012 * idle);
+      const lift = Math.sin(time * 1.1) * 0.06 * idle;
+      bag.position.y = lift;
+      blob.scale.setScalar(1 - lift * 0.8);
+      blob.material.opacity = 0.2 - lift * 0.6;
+
+      // Zooming in drifts the camera towards the bag so it stays in frame.
+      const focus = rig.position.y * clamp((view.zoom - 1) / 0.8, 0, 1);
+      const d = baseDist / view.zoom;
+      camera.position.set(0, focus + d * 0.1, d);
+      camera.lookAt(0, focus, 0);
+      camera.updateProjectionMatrix();
+
+      pearlMat.color.lerp(pearlTarget, 1 - Math.exp(-dt * 6));
+      pearls.forEach((m) => {
+        const u = m.userData;
+        m.position.y = u.y + Math.sin(time * u.speed + u.phase) * 0.12 * idle;
+      });
+
+      rig.updateMatrixWorld(true);
+      uniforms.uGroupInv.value.copy(bag.matrixWorld).invert();
+      renderer.render(scene, camera);
+
+      // Pin the detail points to the bag and hide the ones facing away.
+      spots.forEach((s) => {
+        v3.copy(s.pos).applyMatrix4(bag.matrixWorld);
+        n3.copy(s.n).transformDirection(bag.matrixWorld);
+        toCam.copy(camera.position).sub(v3).normalize();
+        const facing = n3.dot(toCam) > s.min;
+        v3.project(camera);
+        const x = ((v3.x + 1) / 2) * W, y = ((1 - v3.y) / 2) * H;
+        const show = showDots && facing && v3.z < 1 && x > 12 && x < W - 12 && y > 12 && y < H - 12;
+        if (show !== s.shown) {
+          s.shown = show;
+          s.el.classList.toggle('off', !show);
+          s.el.tabIndex = show ? 0 : -1;
+          if (!show) s.el.classList.remove('open');
+          if (show) s.cw = s.el.firstElementChild.offsetWidth;
+        }
+        if (show) {
+          s.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+          // Open the label on whichever side has room for it.
+          const roomRight = x + 38 + s.cw < W - 8, roomLeft = x - 38 - s.cw > 8;
+          s.el.classList.toggle('flip', !roomRight && (roomLeft || x > W / 2));
+        }
+      });
+
+      if (view.touched) {
+        const text = angleLabel(bag.rotation.y);
+        if (text !== lastReadout) { lastReadout = text; readout.textContent = text; }
+      }
+    }
+
+    return { update, resize, setPearl, controls };
+  }
+
+  let three = null;
+  try { three = initThree($('#bag-canvas')); } catch (err) { console.warn('3D view unavailable', err); three = null; }
+  if (!three) {
+    $('#bag-canvas').hidden = true;
+    $('#viewer').hidden = true;
+    $('#hotspots').hidden = true;
+    const fb = $('#fallback');
+    fb.innerHTML = bagSVG('currentColor');
+    fb.hidden = false;
+  } else {
+    const spinBtn = $('#v-spin'), dotsBtn = $('#v-dots');
+    spinBtn.addEventListener('click', () => spinBtn.setAttribute('aria-pressed', String(three.controls.toggleSpin())));
+    $('#v-in').addEventListener('click', () => three.controls.zoomBy(1.2));
+    $('#v-out').addEventListener('click', () => three.controls.zoomBy(1 / 1.2));
+    $('#v-reset').addEventListener('click', () => { three.controls.reset(); spinBtn.setAttribute('aria-pressed', 'false'); });
+    dotsBtn.addEventListener('click', () => {
+      const on = dotsBtn.getAttribute('aria-pressed') !== 'true';
+      dotsBtn.setAttribute('aria-pressed', String(on));
+      three.controls.setDots(on);
+    });
+    const setIntro = () => { if (!/°/.test(readout.textContent)) readout.textContent = narrowMQ.matches ? 'Drag to turn · Scroll for colours' : 'Drag to turn'; };
+    setIntro();
+    if (narrowMQ.addEventListener) narrowMQ.addEventListener('change', setIntro);
+  }
+
+  /* ---------- Scroll loop ---------- */
+  let target = 0, p = 0, last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+
+    const r = story.getBoundingClientRect();
+    const total = Math.max(1, story.offsetHeight - window.innerHeight);
+    target = clamp(-r.top / total, 0, 1) * (N - 1);
+    head.classList.toggle('solid', r.bottom < head.offsetHeight + 8);
+
+    p = reduce ? target : p + (target - p) * (1 - Math.exp(-dt * 7));
+    if (Math.abs(target - p) < 0.0005) p = target;
+
+    const seg = Math.min(Math.floor(p), N - 2);
+    const t = p - seg;
+    const sweep = smooth(clamp((t - 0.18) / 0.64, 0, 1));
+    const split = -1.15 + 2.3 * sweep;
+    setActive(split > 0 ? seg + 1 : seg);
+    hint.style.opacity = String(1 - clamp(p * 4, 0, 1));
+
+    // Only draw the 3D scene while the stage is on screen.
+    // Only draw the hero while it's on screen and the quick view is closed.
+    if (three && r.bottom > 0 && qv.hidden) three.update(now / 1000, dt, seg, split);
+    requestAnimationFrame(frame);
+  }
+
+  function onResize() {
+    if (three) three.resize();
+    fitGiant();
+    fitWordmark();
+  }
+  if (window.ResizeObserver) new ResizeObserver(onResize).observe(stage);
+  window.addEventListener('resize', onResize);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(onResize);
+
+  setActive(0);
+  renderCart();
+  onResize();
+  applyStartHash();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
